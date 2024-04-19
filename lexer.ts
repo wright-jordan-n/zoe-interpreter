@@ -47,14 +47,14 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
           case "o": {
             ptr_i.i += 1;
             next = peek(src, ptr_i.i + 1);
-            if (!isOctalDigit(next)) {
+            if (!isOctal(next)) {
               errs.push(`unexpected character '${next}', expected octal`);
               break;
             }
             ptr_i.i += 1;
             for (
               next = peek(src, ptr_i.i + 1);
-              next !== "\0" && isOctalDigit(next);
+              next !== "\0" && isOctal(next);
               ptr_i.i += 1, next = peek(src, ptr_i.i + 1)
             );
             toks.push(
@@ -65,14 +65,14 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
           case "x": {
             ptr_i.i += 1;
             next = peek(src, ptr_i.i + 1);
-            if (!isHexDigit(next)) {
+            if (!isHex(next)) {
               errs.push(`unexpected character '${next}', expected hex`);
               break;
             }
             ptr_i.i += 1;
             for (
               next = peek(src, ptr_i.i + 1);
-              next !== "\0" && isHexDigit(next);
+              next !== "\0" && isHex(next);
               ptr_i.i += 1, next = peek(src, ptr_i.i + 1)
             );
             toks.push(
@@ -83,14 +83,14 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
           case "b": {
             ptr_i.i += 1;
             next = peek(src, ptr_i.i + 1);
-            if (!isBinaryDigit(next)) {
+            if (!isBinary(next)) {
               errs.push(`unexpected character '${next}', expected binary`);
               break;
             }
             ptr_i.i += 1;
             for (
               next = peek(src, ptr_i.i + 1);
-              next !== "\0" && isBinaryDigit(next);
+              next !== "\0" && isBinary(next);
               ptr_i.i += 1, next = peek(src, ptr_i.i + 1)
             );
             toks.push(
@@ -210,16 +210,16 @@ function isDigit(c: string): boolean {
   return 48 <= byte && byte <= 57;
 }
 
-function isBinaryDigit(c: string): boolean {
+function isBinary(c: string): boolean {
   return c === "0" || c === "1";
 }
 
-function isOctalDigit(c: string) {
+function isOctal(c: string) {
   const byte = c.charCodeAt(0);
   return 48 <= byte && byte <= 55;
 }
 
-function isHexDigit(c: string) {
+function isHex(c: string) {
   const byte = c.charCodeAt(0);
   return (48 <= byte && byte <= 57) || (65 <= byte && byte <= 70) ||
     (97 <= byte && byte <= 102);
