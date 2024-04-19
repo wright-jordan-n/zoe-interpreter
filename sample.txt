@@ -4,7 +4,7 @@
 " ` '
 ! != && ||
 INT FLOAT BINARY OCTAL HEX
-var if else fn return loop
+var if else fn return loop break continue
 true false
 IDENTIFIER
 
