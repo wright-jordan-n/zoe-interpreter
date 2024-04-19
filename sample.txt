@@ -2,8 +2,9 @@
 = == + += - -= * *= / /= // % %= < <= > >=
 ( ) { } [ ] , ;
 " ` '
-INT FLOAT
-var if else fn return
+! != && ||
+INT FLOAT BINARY OCTAL HEX
+var if else fn return loop
 true false
 IDENTIFIER
 
