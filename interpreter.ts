@@ -5,7 +5,7 @@ import {
   NullValue,
   RuntimeValue,
   ValueType,
-} from "./values.ts";
+} from "./runtime.ts";
 
 function evaluate(node: Stmt | Expr): RuntimeValue {
   switch (node.tag) {

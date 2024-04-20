@@ -2,7 +2,7 @@ import { Stmt } from "./ast.ts";
 import { lex } from "./lexer.ts";
 import { parse } from "./parser.ts";
 import { Token_t } from "./token.ts";
-import { interpret } from "./evaluator.ts";
+import { interpret } from "./interpreter.ts";
 
 if (Deno.args.length === 0) {
   let toks: Token_t[], stmts: Stmt[], errs: string[];
