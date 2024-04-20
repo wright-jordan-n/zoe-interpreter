@@ -1,4 +1,4 @@
-enum StmtType {
+export enum StmtType {
   LET,
   RETURN,
   EXPRESSION,
@@ -16,20 +16,30 @@ interface ReturnStmt_t {
 
 interface ExprStmt_t {
   tag: StmtType.EXPRESSION;
+  expr: Expr;
 }
 
-enum ExprType {
+export function ExprStmt(expr: Expr): ExprStmt_t {
+  return {
+    tag: StmtType.EXPRESSION,
+    expr,
+  };
+}
+
+export enum ExprType {
   BINARY,
   IDENTIFIER,
   INTEGER,
   FLOAT,
+  NULL,
 }
 
 export type Expr =
   | BinaryExpr_t
   | IdentifierExpr_t
   | IntegerExpr_t
-  | FloatExpr_t;
+  | FloatExpr_t
+  | NullExpr_t;
 
 interface BinaryExpr_t {
   tag: ExprType.BINARY;
@@ -51,6 +61,11 @@ interface IntegerExpr_t {
 interface FloatExpr_t {
   tag: ExprType.FLOAT;
   value: number;
+}
+
+interface NullExpr_t {
+  tag: ExprType.NULL;
+  value: null;
 }
 
 export function BinaryExpr(
@@ -84,5 +99,12 @@ export function FloatExpr(value: number): FloatExpr_t {
   return {
     tag: ExprType.FLOAT,
     value,
+  };
+}
+
+export function NullExpr(): NullExpr_t {
+  return {
+    tag: ExprType.NULL,
+    value: null,
   };
 }

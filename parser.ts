@@ -1,9 +1,11 @@
 import {
   BinaryExpr,
   Expr,
+  ExprStmt,
   FloatExpr,
   IdentifierExpr,
   IntegerExpr,
+  NullExpr,
   Stmt,
 } from "./ast.ts";
 import { Token_t, TokenType } from "./token.ts";
@@ -27,11 +29,20 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
   const errs: string[] = [];
   const ptr: { i: number } = { i: 0 };
   while (toks[ptr.i].type !== TokenType.EOF) {
-    const rslt = parseExpr(toks, ptr);
-    if (typeof rslt === "string") {
-      errs.push(rslt);
-    } else {
-      stmts.push(rslt as unknown as Stmt);
+    switch (toks[ptr.i].type) {
+      default: {
+        const rslt = parseExpr(toks, ptr);
+        if (typeof rslt === "string") {
+          errs.push(rslt);
+        } else {
+          if (toks[ptr.i].type !== TokenType.SEMICOLON) {
+            errs.push(`error: expected ';'`);
+          } else {
+            advance(toks, ptr);
+          }
+          stmts.push(ExprStmt(rslt));
+        }
+      }
     }
   }
   return { stmts, errs };
@@ -58,6 +69,9 @@ function parsePrimaryExpr(
 ): Expr | string {
   const tok = toks[ptr.i];
   switch (tok.type) {
+    case TokenType.NULL:
+      advance(toks, ptr);
+      return NullExpr();
     case TokenType.IDENTIFIER:
       advance(toks, ptr);
       return IdentifierExpr(tok.literal);
