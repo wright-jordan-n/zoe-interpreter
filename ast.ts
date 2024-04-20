@@ -41,7 +41,7 @@ export type Expr =
   | FloatExpr_t
   | NullExpr_t;
 
-interface BinaryExpr_t {
+export interface BinaryExpr_t {
   tag: ExprType.BINARY;
   left: Expr;
   operator: string;

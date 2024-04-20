@@ -2,6 +2,7 @@ import { Stmt } from "./ast.ts";
 import { lex } from "./lexer.ts";
 import { parse } from "./parser.ts";
 import { Token_t } from "./token.ts";
+import { interpret } from "./evaluator.ts";
 
 if (Deno.args.length === 0) {
   let toks: Token_t[], stmts: Stmt[], errs: string[];
@@ -10,6 +11,8 @@ if (Deno.args.length === 0) {
     console.log({ toks, errs });
     ({ stmts, errs } = parse(toks));
     console.log({ stmts, errs });
+    const rslt = interpret(stmts);
+    console.log(rslt.value);
   }
 } else if (Deno.args.length === 1) {
   const bytes = Deno.readFileSync(Deno.args[0]);

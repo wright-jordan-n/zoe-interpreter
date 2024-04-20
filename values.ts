@@ -1,4 +1,4 @@
-enum ValueType {
+export enum ValueType {
   NULL,
   FLOAT,
   INTEGER,

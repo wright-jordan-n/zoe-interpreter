@@ -1,7 +1,7 @@
 import {
   BinaryExpr,
   Expr,
-  ExprStmt,
+  /*ExprStmt,*/
   FloatExpr,
   IdentifierExpr,
   IntegerExpr,
@@ -17,12 +17,12 @@ function advance(toks: Token_t[], ptr: { i: number }): void {
   ptr.i += 1;
 }
 
-function peek(toks: Token_t[], ptr: { i: number }): Token_t | null {
-  if (ptr.i === toks.length - 1) {
-    return null;
-  }
-  return toks[ptr.i + 1];
-}
+// function peek(toks: Token_t[], ptr: { i: number }): Token_t | null {
+//   if (ptr.i === toks.length - 1) {
+//     return null;
+//   }
+//   return toks[ptr.i + 1];
+// }
 
 export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
   const stmts: Stmt[] = [];
@@ -40,7 +40,7 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
           } else {
             advance(toks, ptr);
           }
-          stmts.push(ExprStmt(rslt));
+          stmts.push(/*ExprStmt(rslt)*/ rslt as unknown as Stmt);
         }
       }
     }
