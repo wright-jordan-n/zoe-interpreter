@@ -37,7 +37,7 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
   return { stmts, errs };
 }
 
-// Order or Precendence
+// Order of Operations
 // PrimaryExpr
 // FuncCall ArraySubscript StructAccess
 // UnaryExpr
