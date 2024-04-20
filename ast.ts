@@ -34,8 +34,8 @@ export type Expr =
 interface BinaryExpr_t {
   tag: ExprType.BINARY;
   left: Expr;
-  right: Expr;
   operator: string;
+  right: Expr;
 }
 
 interface IdentifierExpr_t {
@@ -55,14 +55,14 @@ interface FloatExpr_t {
 
 export function BinaryExpr(
   left: Expr,
-  right: Expr,
   operator: string,
+  right: Expr,
 ): BinaryExpr_t {
   return {
     tag: ExprType.BINARY,
     left,
-    right,
     operator,
+    right,
   };
 }
 

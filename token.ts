@@ -15,6 +15,7 @@ export enum TokenType {
   INT,
   FLOAT,
 
+  NULL,
   VAR,
   IDENTIFIER,
 
@@ -23,6 +24,7 @@ export enum TokenType {
 
 const keywords = new Map<string, TokenType>();
 keywords.set("var", TokenType.VAR);
+keywords.set("null", TokenType.NULL);
 
 export { keywords };
 
