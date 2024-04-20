@@ -24,7 +24,6 @@ function parsePrimaryExpr(
   ptr_i: { i: number },
 ): Expr | string {
   const tok = toks[ptr_i.i];
-  console.log(tok);
   switch (tok.type) {
     case TokenType.IDENTIFIER:
       return IdentifierExpr(tok.literal);
