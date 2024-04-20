@@ -1,18 +1,18 @@
 import { Expr, FloatExpr, IdentifierExpr, IntegerExpr, Stmt } from "./ast.ts";
 import { Token_t, TokenType } from "./token.ts";
 
-export function parse(toks: Token_t[]): { ast: Stmt[]; errs: string[] } {
-  const ast: Stmt[] = [];
+export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
+  const stmts: Stmt[] = [];
   const errs: string[] = [];
   for (const ptr_i = { i: 0 }; ptr_i.i < toks.length; ptr_i.i += 1) {
     const rslt = parseExpr(toks, ptr_i);
     if (typeof rslt === "string") {
       errs.push(rslt);
     } else {
-      ast.push(rslt as unknown as Stmt);
+      stmts.push(rslt as unknown as Stmt);
     }
   }
-  return { ast, errs };
+  return { stmts, errs };
 }
 
 function parseExpr(toks: Token_t[], ptr_i: { i: number }): Expr | string {

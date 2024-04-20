@@ -4,19 +4,19 @@ import { parse } from "./parser.ts";
 import { Token_t } from "./token.ts";
 
 if (Deno.args.length === 0) {
-  let toks: Token_t[], ast: Stmt[], errs: string[];
+  let toks: Token_t[], stmts: Stmt[], errs: string[];
   for (let input = prompt(">"); input !== null; input = prompt(">")) {
     ({ toks, errs } = lex(input));
     console.log({ toks, errs });
-    ({ ast, errs } = parse(toks));
-    console.log({ ast, errs });
+    ({ stmts, errs } = parse(toks));
+    console.log({ stmts, errs });
   }
 } else if (Deno.args.length === 1) {
   const bytes = Deno.readFileSync(Deno.args[0]);
   const src = new TextDecoder().decode(bytes);
-  let toks: Token_t[], ast: Stmt[], errs: string[];
+  let toks: Token_t[], stmts: Stmt[], errs: string[];
   ({ toks, errs } = lex(src));
   console.log({ toks, errs });
-  ({ ast, errs } = parse(toks));
-  console.log({ ast, errs });
+  ({ stmts, errs } = parse(toks));
+  console.log({ stmts, errs });
 }
