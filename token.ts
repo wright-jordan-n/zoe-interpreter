@@ -11,8 +11,8 @@ export enum TokenType {
 
   BINARY,
   OCTAL,
-  HEX,
-  INT,
+  HEXADECIMAL,
+  INTEGER,
   FLOAT,
 
   NULL,

@@ -1,7 +1,7 @@
 enum StmtType {
   LET,
   RETURN,
-  EXPR,
+  EXPRESSION,
 }
 
 export type Stmt = LetStmt_t | ReturnStmt_t | ExprStmt_t;
@@ -15,7 +15,7 @@ interface ReturnStmt_t {
 }
 
 interface ExprStmt_t {
-  tag: StmtType.EXPR;
+  tag: StmtType.EXPRESSION;
 }
 
 enum ExprType {

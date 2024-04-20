@@ -3,8 +3,8 @@ import { keywords, Token, Token_t, TokenType } from "./token.ts";
 export function lex(src: string): { toks: Token_t[]; errs: string[] } {
   const toks: Token_t[] = [];
   const errs: string[] = [];
-  for (const ptr_i = { i: 0 }; ptr_i.i < src.length; ptr_i.i += 1) {
-    const c = src[ptr_i.i];
+  for (const ptr = { i: 0 }; ptr.i < src.length; ptr.i += 1) {
+    const c = src[ptr.i];
     switch (c) {
       case " ":
       case "\t":
@@ -41,78 +41,78 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
         toks.push(Token(TokenType.SEMICOLON, c));
         break;
       case "0": {
-        const start = ptr_i.i;
-        let next = peek(src, ptr_i.i + 1);
+        const start = ptr.i;
+        let next = peek(src, ptr.i + 1);
         switch (next) {
           case "o": {
-            ptr_i.i += 1;
-            next = peek(src, ptr_i.i + 1);
+            ptr.i += 1;
+            next = peek(src, ptr.i + 1);
             if (!isOctal(next)) {
               errs.push(`unexpected character '${next}', expected octal`);
               break;
             }
-            ptr_i.i += 1;
+            ptr.i += 1;
             for (
-              next = peek(src, ptr_i.i + 1);
+              next = peek(src, ptr.i + 1);
               next !== "\0" && isOctal(next);
-              ptr_i.i += 1, next = peek(src, ptr_i.i + 1)
+              ptr.i += 1, next = peek(src, ptr.i + 1)
             );
             toks.push(
-              Token(TokenType.OCTAL, src.substring(start, ptr_i.i + 1)),
+              Token(TokenType.OCTAL, src.substring(start, ptr.i + 1)),
             );
             break;
           }
           case "x": {
-            ptr_i.i += 1;
-            next = peek(src, ptr_i.i + 1);
-            if (!isHex(next)) {
+            ptr.i += 1;
+            next = peek(src, ptr.i + 1);
+            if (!isHexadecimal(next)) {
               errs.push(`unexpected character '${next}', expected hex`);
               break;
             }
-            ptr_i.i += 1;
+            ptr.i += 1;
             for (
-              next = peek(src, ptr_i.i + 1);
-              next !== "\0" && isHex(next);
-              ptr_i.i += 1, next = peek(src, ptr_i.i + 1)
+              next = peek(src, ptr.i + 1);
+              next !== "\0" && isHexadecimal(next);
+              ptr.i += 1, next = peek(src, ptr.i + 1)
             );
             toks.push(
-              Token(TokenType.HEX, src.substring(start, ptr_i.i + 1)),
+              Token(TokenType.HEXADECIMAL, src.substring(start, ptr.i + 1)),
             );
             break;
           }
           case "b": {
-            ptr_i.i += 1;
-            next = peek(src, ptr_i.i + 1);
+            ptr.i += 1;
+            next = peek(src, ptr.i + 1);
             if (!isBinary(next)) {
               errs.push(`unexpected character '${next}', expected binary`);
               break;
             }
-            ptr_i.i += 1;
+            ptr.i += 1;
             for (
-              next = peek(src, ptr_i.i + 1);
+              next = peek(src, ptr.i + 1);
               next !== "\0" && isBinary(next);
-              ptr_i.i += 1, next = peek(src, ptr_i.i + 1)
+              ptr.i += 1, next = peek(src, ptr.i + 1)
             );
             toks.push(
-              Token(TokenType.BINARY, src.substring(start, ptr_i.i + 1)),
+              Token(TokenType.BINARY, src.substring(start, ptr.i + 1)),
             );
             break;
           }
           case ".": {
-            ptr_i.i += 1;
-            next = peek(src, ptr_i.i + 1);
+            ptr.i += 1;
+            next = peek(src, ptr.i + 1);
             if (!isDigit(next)) {
               errs.push(`unexpected character '${next}', expected digit`);
               break;
             }
-            ptr_i.i += 1;
+            ptr.i += 1;
             for (
-              next = peek(src, ptr_i.i + 1);
+              next = peek(src, ptr.i + 1);
               next !== "\0" && isDigit(next);
-              ptr_i.i += 1, next = peek(src, ptr_i.i + 1)
+              ptr.i += 1, next = peek(src, ptr.i + 1)
             );
             toks.push(
-              Token(TokenType.FLOAT, src.substring(start, ptr_i.i + 1)),
+              Token(TokenType.FLOAT, src.substring(start, ptr.i + 1)),
             );
             break;
           }
@@ -120,27 +120,27 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
             for (
               ;
               next !== "\0" && isDigit(next);
-              ptr_i.i += 1, next = peek(src, ptr_i.i + 1)
+              ptr.i += 1, next = peek(src, ptr.i + 1)
             );
             if (next === ".") {
-              ptr_i.i += 1;
-              next = peek(src, ptr_i.i + 1);
+              ptr.i += 1;
+              next = peek(src, ptr.i + 1);
               if (!isDigit(next)) {
                 errs.push(`unexpected character '${next}', expected digit`);
                 break;
               }
-              ptr_i.i += 1;
+              ptr.i += 1;
               for (
-                next = peek(src, ptr_i.i + 1);
+                next = peek(src, ptr.i + 1);
                 next !== "\0" && isDigit(next);
-                ptr_i.i += 1, next = peek(src, ptr_i.i + 1)
+                ptr.i += 1, next = peek(src, ptr.i + 1)
               );
-              const literal = src.substring(start, ptr_i.i + 1);
+              const literal = src.substring(start, ptr.i + 1);
               toks.push(Token(TokenType.FLOAT, literal));
               break;
             }
-            const literal = src.substring(start, ptr_i.i + 1);
-            toks.push(Token(TokenType.INT, literal));
+            const literal = src.substring(start, ptr.i + 1);
+            toks.push(Token(TokenType.INTEGER, literal));
             break;
           }
         }
@@ -148,13 +148,13 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
       }
       default:
         if (isAlpha(c)) {
-          const start = ptr_i.i;
+          const start = ptr.i;
           for (
-            let next = peek(src, ptr_i.i + 1);
+            let next = peek(src, ptr.i + 1);
             next !== "\0" && isAlphaNumeric(next);
-            ptr_i.i += 1, next = peek(src, ptr_i.i + 1)
+            ptr.i += 1, next = peek(src, ptr.i + 1)
           );
-          const literal = src.substring(start, ptr_i.i + 1);
+          const literal = src.substring(start, ptr.i + 1);
           const keyword = keywords.get(literal);
           if (keyword === undefined) {
             toks.push(Token(TokenType.IDENTIFIER, literal));
@@ -164,32 +164,32 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
           break;
         }
         if (isDigit(c)) {
-          const start = ptr_i.i;
-          let next = peek(src, ptr_i.i + 1);
+          const start = ptr.i;
+          let next = peek(src, ptr.i + 1);
           for (
             ;
             next !== "\0" && isDigit(next);
-            ptr_i.i += 1, next = peek(src, ptr_i.i + 1)
+            ptr.i += 1, next = peek(src, ptr.i + 1)
           );
           if (next === ".") {
-            ptr_i.i += 1;
-            next = peek(src, ptr_i.i + 1);
+            ptr.i += 1;
+            next = peek(src, ptr.i + 1);
             if (!isDigit(next)) {
               errs.push(`unexpected character '${next}', expected digit`);
               break;
             }
-            ptr_i.i += 1;
+            ptr.i += 1;
             for (
-              next = peek(src, ptr_i.i + 1);
+              next = peek(src, ptr.i + 1);
               next !== "\0" && isDigit(next);
-              ptr_i.i += 1, next = peek(src, ptr_i.i + 1)
+              ptr.i += 1, next = peek(src, ptr.i + 1)
             );
-            const literal = src.substring(start, ptr_i.i + 1);
+            const literal = src.substring(start, ptr.i + 1);
             toks.push(Token(TokenType.FLOAT, literal));
             break;
           }
-          const literal = src.substring(start, ptr_i.i + 1);
-          toks.push(Token(TokenType.INT, literal));
+          const literal = src.substring(start, ptr.i + 1);
+          toks.push(Token(TokenType.INTEGER, literal));
           break;
         }
         errs.push(`invalid character '${c}'`);
@@ -219,7 +219,7 @@ function isOctal(c: string) {
   return 48 <= byte && byte <= 55;
 }
 
-function isHex(c: string) {
+function isHexadecimal(c: string) {
   const byte = c.charCodeAt(0);
   return (48 <= byte && byte <= 57) || (65 <= byte && byte <= 70) ||
     (97 <= byte && byte <= 102);
@@ -231,9 +231,9 @@ function isAlphaNumeric(c: string) {
     (65 <= byte && byte <= 90) || (byte === 95);
 }
 
-function peek(src: string, i: number): string {
-  if (i >= src.length) {
+function peek(src: string, n: number): string {
+  if (n >= src.length) {
     return "\0";
   }
-  return src[i];
+  return src[n];
 }

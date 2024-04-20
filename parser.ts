@@ -61,8 +61,8 @@ function parsePrimaryExpr(
     case TokenType.IDENTIFIER:
       advance(toks, ptr);
       return IdentifierExpr(tok.literal);
-    case TokenType.INT:
-    case TokenType.HEX:
+    case TokenType.INTEGER:
+    case TokenType.HEXADECIMAL:
     case TokenType.OCTAL:
     case TokenType.BINARY:
       advance(toks, ptr);
@@ -77,7 +77,6 @@ function parsePrimaryExpr(
         return rslt;
       }
       if (toks[ptr.i].type !== TokenType.RPAREN) {
-        // advance(toks, ptr);
         return `error: unexpected token '${toks[ptr.i].literal}', expected ')'`;
       }
       advance(toks, ptr);
