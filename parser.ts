@@ -15,7 +15,7 @@ function advance(toks: Token_t[], ptr: { i: number }): void {
   ptr.i += 1;
 }
 
-function _peek(toks: Token_t[], ptr: { i: number }): Token_t | null {
+function peek(toks: Token_t[], ptr: { i: number }): Token_t | null {
   if (ptr.i === toks.length - 1) {
     return null;
   }
@@ -48,8 +48,8 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
 // ||
 // AssignmentExpr
 
-function parseExpr(toks: Token_t[], ptr_i: { i: number }): Expr | string {
-  return parseAdditiveExpr(toks, ptr_i);
+function parseExpr(toks: Token_t[], ptr: { i: number }): Expr | string {
+  return parseAdditiveExpr(toks, ptr);
 }
 
 function parsePrimaryExpr(
