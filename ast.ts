@@ -4,8 +4,18 @@ enum StmtType {
   EXPR,
 }
 
-export interface Stmt {
-  stmtType: StmtType;
+export type Stmt = LetStmt_t | ReturnStmt_t | ExprStmt_t;
+
+interface LetStmt_t {
+  tag: StmtType.LET;
+}
+
+interface ReturnStmt_t {
+  tag: StmtType.RETURN;
+}
+
+interface ExprStmt_t {
+  tag: StmtType.EXPR;
 }
 
 enum ExprType {
@@ -43,7 +53,11 @@ interface FloatExpr_t {
   value: number;
 }
 
-function BinaryExpr(left: Expr, right: Expr, operator: string): BinaryExpr_t {
+export function BinaryExpr(
+  left: Expr,
+  right: Expr,
+  operator: string,
+): BinaryExpr_t {
   return {
     tag: ExprType.BINARY,
     left,
