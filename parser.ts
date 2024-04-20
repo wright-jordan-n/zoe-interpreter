@@ -77,7 +77,7 @@ function parsePrimaryExpr(
         return rslt;
       }
       if (toks[ptr.i].type !== TokenType.RPAREN) {
-        advance(toks, ptr);
+        // advance(toks, ptr);
         return `error: unexpected token '${toks[ptr.i].literal}', expected ')'`;
       }
       advance(toks, ptr);
