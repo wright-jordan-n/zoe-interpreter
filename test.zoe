@@ -1,2 +1,4 @@
-var zoe = 69;
-zoe + 420;
+var zoe = {
+    age: 15,
+    hungry: true,
+};

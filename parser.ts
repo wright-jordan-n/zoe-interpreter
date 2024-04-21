@@ -8,6 +8,9 @@ import {
   IdentifierExpr,
   IntegerExpr,
   NullExpr,
+  ObjectExpr,
+  PropertyExpr,
+  PropertyExpr_t,
   Stmt,
   VarStmt,
   VarStmt_t,
@@ -196,11 +199,61 @@ function parseAdditiveExpr(
   return left;
 }
 
+function parseObjectExpr(toks: Token_t[], ptr: { i: number }): Expr | string {
+  if (toks[ptr.i].type !== TokenType.LBRACE) {
+    return parseAdditiveExpr(toks, ptr);
+  }
+  advance(toks, ptr);
+  const properties: PropertyExpr_t[] = [];
+  for (
+    ;
+    toks[ptr.i].type !== TokenType.EOF && toks[ptr.i].type !== TokenType.RBRACE;
+  ) {
+    if (toks[ptr.i].type !== TokenType.IDENTIFIER) {
+      return `error: unexpected token '${
+        toks[ptr.i].literal
+      }' expected identifier`;
+    }
+    const key = toks[ptr.i].literal;
+    advance(toks, ptr);
+    if (toks[ptr.i].type === TokenType.COMMA) {
+      advance(toks, ptr);
+      properties.push(PropertyExpr(key, null));
+      continue;
+    }
+    if (toks[ptr.i].type === TokenType.RBRACE) {
+      properties.push(PropertyExpr(key, null));
+      break;
+    }
+    if (toks[ptr.i].type !== TokenType.COLON) {
+      return `error: unexpected token '${toks[ptr.i].literal}', expected ':'`;
+    }
+    advance(toks, ptr);
+    const value = parseExpr(toks, ptr);
+    if (typeof value === "string") {
+      return value;
+    }
+    properties.push(PropertyExpr(key, value));
+    if (toks[ptr.i].type === TokenType.RBRACE) {
+      break;
+    }
+    if (toks[ptr.i].type !== TokenType.COMMA) {
+      return `error: unexpected token '${toks[ptr.i].literal}' expected ','`;
+    }
+    advance(toks, ptr);
+    if (toks[ptr.i].type === TokenType.COMMA) {
+      advance(toks, ptr);
+    }
+  }
+  advance(toks, ptr);
+  return ObjectExpr(properties);
+}
+
 function parseAssignmentExpr(
   toks: Token_t[],
   ptr: { i: number },
 ): Expr | string {
-  let left = parseAdditiveExpr(toks, ptr);
+  let left = parseObjectExpr(toks, ptr);
   if (typeof left === "string") {
     return left;
   }
@@ -211,7 +264,7 @@ function parseAssignmentExpr(
   ) {
     const operator = tok.literal;
     advance(toks, ptr);
-    const right = parseAdditiveExpr(toks, ptr);
+    const right = parseObjectExpr(toks, ptr);
     if (typeof right === "string") {
       return right;
     }

@@ -9,6 +9,8 @@ export enum NodeType {
   FLOAT_EXPR,
   NULL_EXPR,
   BOOLEAN_EXPR,
+  OBJECT_EXPR,
+  PROPERTY_EXPR,
 }
 
 export type Stmt = VarStmt_t | ReturnStmt_t | ExprStmt_t;
@@ -50,7 +52,8 @@ export type Expr =
   | FloatExpr_t
   | NullExpr_t
   | BooleanExpr_t
-  | AssignmentExpr_t;
+  | AssignmentExpr_t
+  | ObjectExpr_t;
 
 export interface AssignmentExpr_t {
   tag: NodeType.ASSIGNMENT_EXPR;
@@ -89,6 +92,35 @@ interface NullExpr_t {
 interface BooleanExpr_t {
   tag: NodeType.BOOLEAN_EXPR;
   value: boolean;
+}
+
+interface ObjectExpr_t {
+  tag: NodeType.OBJECT_EXPR;
+  properties: PropertyExpr_t[];
+}
+
+export function ObjectExpr(properties: PropertyExpr_t[]): ObjectExpr_t {
+  return {
+    tag: NodeType.OBJECT_EXPR,
+    properties,
+  };
+}
+
+export interface PropertyExpr_t {
+  tag: NodeType.PROPERTY_EXPR;
+  symbol: string;
+  value: Expr | null;
+}
+
+export function PropertyExpr(
+  symbol: string,
+  value: Expr | null,
+): PropertyExpr_t {
+  return {
+    tag: NodeType.PROPERTY_EXPR,
+    symbol,
+    value,
+  };
 }
 
 export function BinaryExpr(
