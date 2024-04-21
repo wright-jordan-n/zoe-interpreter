@@ -199,6 +199,7 @@ function parseAdditiveExpr(
   return left;
 }
 
+// Shouldn't this be a primary expr?
 function parseObjectExpr(toks: Token_t[], ptr: { i: number }): Expr | string {
   if (toks[ptr.i].type !== TokenType.LBRACE) {
     return parseAdditiveExpr(toks, ptr);
