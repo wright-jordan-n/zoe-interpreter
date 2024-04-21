@@ -27,7 +27,6 @@ export function interpret(stmts: Stmt[], env: Environment_t): RuntimeValue {
 }
 
 function evaluate(node: Stmt | Expr, env: Environment_t): RuntimeValue {
-  console.log(node);
   switch (node.tag) {
     case NodeType.VAR_STMT:
       return evalVarStmt(node, env);
