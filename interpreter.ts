@@ -135,6 +135,7 @@ function evalIdentifierExpr(
   return lookupVar(scope, expr.symbol);
 }
 
+// I might want to swap these switches.
 function evalAssignmentExpr(
   expr: AssignmentExpr_t,
   scope: Scope_t,
