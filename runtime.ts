@@ -2,9 +2,14 @@ export enum ValueType {
   NULL,
   FLOAT,
   INTEGER,
+  BOOLEAN,
 }
 
-export type RuntimeValue = NullValue_t | FloatValue_t | IntegerValue_t;
+export type RuntimeValue =
+  | NullValue_t
+  | FloatValue_t
+  | IntegerValue_t
+  | BooleanValue_t;
 
 interface NullValue_t {
   tag: ValueType.NULL;
@@ -38,6 +43,18 @@ interface IntegerValue_t {
 export function IntegerValue(value: bigint): IntegerValue_t {
   return {
     tag: ValueType.INTEGER,
+    value,
+  };
+}
+
+interface BooleanValue_t {
+  tag: ValueType.BOOLEAN;
+  value: boolean;
+}
+
+export function BooleanValue(value: boolean): BooleanValue_t {
+  return {
+    tag: ValueType.BOOLEAN,
     value,
   };
 }

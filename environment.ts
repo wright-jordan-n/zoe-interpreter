@@ -1,6 +1,6 @@
 import { RuntimeValue } from "./runtime.ts";
 
-interface Environment_t {
+export interface Environment_t {
   parent: Environment_t | null;
   symbols: Map<string, RuntimeValue>;
 }

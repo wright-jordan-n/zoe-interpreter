@@ -1,5 +1,7 @@
-import { BinaryExpr_t, Expr, ExprType, Stmt } from "./ast.ts";
+import { BinaryExpr_t, Expr, ExprType, IdentifierExpr_t, Stmt } from "./ast.ts";
+import { Environment_t, lookupVar } from "./environment.ts";
 import {
+  BooleanValue,
   FloatValue,
   IntegerValue,
   NullValue,
@@ -7,7 +9,7 @@ import {
   ValueType,
 } from "./runtime.ts";
 
-function evaluate(node: Stmt | Expr): RuntimeValue {
+function evaluate(node: Stmt | Expr, env: Environment_t): RuntimeValue {
   switch (node.tag) {
     case ExprType.INTEGER:
       return IntegerValue(node.value);
@@ -15,24 +17,31 @@ function evaluate(node: Stmt | Expr): RuntimeValue {
       return FloatValue(node.value);
     case ExprType.NULL:
       return NullValue();
+    case ExprType.BOOLEAN:
+      if (node.value) {
+        return BooleanValue(true);
+      }
+      return BooleanValue(false);
     case ExprType.BINARY:
-      return evalBinaryExpr(node);
+      return evalBinaryExpr(node, env);
+    case ExprType.IDENTIFIER:
+      return evalIdentifierExpr(node, env);
     default:
       return NullValue();
   }
 }
 
-export function interpret(stmts: Stmt[]): RuntimeValue {
+export function interpret(stmts: Stmt[], env: Environment_t): RuntimeValue {
   let lastEval: RuntimeValue = NullValue();
   for (const stmt of stmts) {
-    lastEval = evaluate(stmt);
+    lastEval = evaluate(stmt, env);
   }
   return lastEval;
 }
 
-function evalBinaryExpr(expr: BinaryExpr_t): RuntimeValue {
-  const lhs = evaluate(expr.left);
-  const rhs = evaluate(expr.right);
+function evalBinaryExpr(expr: BinaryExpr_t, env: Environment_t): RuntimeValue {
+  const lhs = evaluate(expr.left, env);
+  const rhs = evaluate(expr.right, env);
   if (lhs.tag !== rhs.tag) {
     throw new Error(`error: operands of different types`);
   }
@@ -86,4 +95,11 @@ function evalBinaryExpr(expr: BinaryExpr_t): RuntimeValue {
     default:
       throw new Error(`unable to evaluate binary operator '${expr.operator}'`);
   }
+}
+
+function evalIdentifierExpr(
+  expr: IdentifierExpr_t,
+  env: Environment_t,
+): RuntimeValue {
+  return lookupVar(env, expr.symbol);
 }

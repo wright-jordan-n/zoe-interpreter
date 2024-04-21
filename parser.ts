@@ -1,5 +1,6 @@
 import {
   BinaryExpr,
+  BooleanExpr,
   Expr,
   /*ExprStmt,*/
   FloatExpr,
@@ -69,6 +70,12 @@ function parsePrimaryExpr(
 ): Expr | string {
   const tok = toks[ptr.i];
   switch (tok.type) {
+    case TokenType.TRUE:
+      advance(toks, ptr);
+      return BooleanExpr(true);
+    case TokenType.FALSE:
+      advance(toks, ptr);
+      return BooleanExpr(false);
     case TokenType.NULL:
       advance(toks, ptr);
       return NullExpr();

@@ -1,13 +1,13 @@
 export enum StmtType {
-  LET,
+  VAR,
   RETURN,
   EXPRESSION,
 }
 
-export type Stmt = LetStmt_t | ReturnStmt_t | ExprStmt_t;
+export type Stmt = VarStmt_t | ReturnStmt_t | ExprStmt_t;
 
-interface LetStmt_t {
-  tag: StmtType.LET;
+interface VarStmt_t {
+  tag: StmtType.VAR;
 }
 
 interface ReturnStmt_t {
@@ -32,6 +32,7 @@ export enum ExprType {
   INTEGER,
   FLOAT,
   NULL,
+  BOOLEAN,
 }
 
 export type Expr =
@@ -39,7 +40,8 @@ export type Expr =
   | IdentifierExpr_t
   | IntegerExpr_t
   | FloatExpr_t
-  | NullExpr_t;
+  | NullExpr_t
+  | BooleanExpr_t;
 
 export interface BinaryExpr_t {
   tag: ExprType.BINARY;
@@ -48,7 +50,7 @@ export interface BinaryExpr_t {
   right: Expr;
 }
 
-interface IdentifierExpr_t {
+export interface IdentifierExpr_t {
   tag: ExprType.IDENTIFIER;
   symbol: string;
 }
@@ -66,6 +68,11 @@ interface FloatExpr_t {
 interface NullExpr_t {
   tag: ExprType.NULL;
   value: null;
+}
+
+interface BooleanExpr_t {
+  tag: ExprType.BOOLEAN;
+  value: boolean;
 }
 
 export function BinaryExpr(
@@ -106,5 +113,12 @@ export function NullExpr(): NullExpr_t {
   return {
     tag: ExprType.NULL,
     value: null,
+  };
+}
+
+export function BooleanExpr(value: boolean): BooleanExpr_t {
+  return {
+    tag: ExprType.BOOLEAN,
+    value,
   };
 }
