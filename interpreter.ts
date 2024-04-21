@@ -5,6 +5,7 @@ import {
   ExprStmt_t,
   IdentifierExpr_t,
   NodeType,
+  ObjectExpr_t,
   Stmt,
   VarStmt_t,
 } from "./ast.ts";
@@ -14,6 +15,7 @@ import {
   FloatValue,
   IntegerValue,
   NullValue,
+  ObjectValue,
   RuntimeValue,
   ValueType,
 } from "./runtime.ts";
@@ -47,6 +49,8 @@ function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
       return evalBinaryExpr(node, scope);
     case NodeType.IDENTIFIER_EXPR:
       return evalIdentifierExpr(node, scope);
+    case NodeType.OBJECT_EXPR:
+      return evalObjectExpr(node, scope);
     case NodeType.ASSIGNMENT_EXPR:
       return evalAssignmentExpr(node, scope);
     default:
@@ -133,6 +137,18 @@ function evalIdentifierExpr(
   scope: Scope_t,
 ): RuntimeValue {
   return lookupVar(scope, expr.symbol);
+}
+
+function evalObjectExpr(expr: ObjectExpr_t, scope: Scope_t): RuntimeValue {
+  const m = new Map<string, RuntimeValue>();
+  for (const { symbol, value } of expr.properties) {
+    if (value === null) {
+      m.set(symbol, lookupVar(scope, symbol));
+    } else {
+      m.set(symbol, evaluate(value, scope));
+    }
+  }
+  return ObjectValue(m);
 }
 
 // I might want to swap these switches.

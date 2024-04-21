@@ -94,7 +94,7 @@ interface BooleanExpr_t {
   value: boolean;
 }
 
-interface ObjectExpr_t {
+export interface ObjectExpr_t {
   tag: NodeType.OBJECT_EXPR;
   properties: PropertyExpr_t[];
 }
