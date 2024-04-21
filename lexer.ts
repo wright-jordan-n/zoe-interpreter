@@ -37,6 +37,18 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
       case ")":
         toks.push(Token(TokenType.RPAREN, c));
         break;
+      case "{":
+        toks.push(Token(TokenType.LBRACE, c));
+        break;
+      case "}":
+        toks.push(Token(TokenType.RBRACE, c));
+        break;
+      case ",":
+        toks.push(Token(TokenType.COMMA, c));
+        break;
+      case ":":
+        toks.push(Token(TokenType.COLON, c));
+        break;
       case ";":
         toks.push(Token(TokenType.SEMICOLON, c));
         break;

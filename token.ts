@@ -7,6 +7,10 @@ export enum TokenType {
   MODULO,
   LPAREN,
   RPAREN,
+  LBRACE,
+  RBRACE,
+  COMMA,
+  COLON,
   SEMICOLON,
 
   BINARY,
