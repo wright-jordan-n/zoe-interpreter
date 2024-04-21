@@ -13,10 +13,10 @@ if (Deno.args.length === 0) {
     console.log({ toks, errs });
     ({ stmts, errs } = parse(toks));
     console.log({ stmts, errs });
-    const env = Environment(null);
-    initVar(env, "x", IntegerValue(73n));
-    const rslt = interpret(stmts, env);
-    console.log(rslt.value);
+    // const env = Environment(null);
+    // initVar(env, "x", IntegerValue(73n));
+    // const rslt = interpret(stmts, env);
+    // console.log(rslt.value);
   }
 } else if (Deno.args.length === 1) {
   const bytes = Deno.readFileSync(Deno.args[0]);

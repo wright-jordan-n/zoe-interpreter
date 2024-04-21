@@ -8,6 +8,8 @@ import {
   IntegerExpr,
   NullExpr,
   Stmt,
+  VarStmt,
+  VarStmt_t,
 } from "./ast.ts";
 import { Token_t, TokenType } from "./token.ts";
 
@@ -31,6 +33,15 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
   const ptr: { i: number } = { i: 0 };
   while (toks[ptr.i].type !== TokenType.EOF) {
     switch (toks[ptr.i].type) {
+      case TokenType.VAR: {
+        const rslt = parseVarStmt(toks, ptr);
+        if (typeof rslt === "string") {
+          errs.push(rslt);
+          break;
+        }
+        stmts.push(rslt);
+        break;
+      }
       default: {
         const rslt = parseExpr(toks, ptr);
         if (typeof rslt === "string") {
@@ -47,6 +58,32 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
     }
   }
   return { stmts, errs };
+}
+
+function parseVarStmt(toks: Token_t[], ptr: { i: number }): VarStmt_t | string {
+  advance(toks, ptr);
+  if (toks[ptr.i].type !== TokenType.IDENTIFIER) {
+    return `unexpected token '${toks[ptr.i].literal}' expected identifier`;
+  }
+  const symbol = toks[ptr.i].literal;
+  advance(toks, ptr);
+  if (toks[ptr.i].type === TokenType.SEMICOLON) {
+    advance(toks, ptr);
+    return VarStmt(symbol, null);
+  }
+  if (toks[ptr.i].type !== TokenType.ASSIGN) {
+    return `unexpected token '${toks[ptr.i].literal}' expected '=' or ';'`;
+  }
+  advance(toks, ptr);
+  const expr = parseExpr(toks, ptr);
+  if (typeof expr === "string") {
+    return expr;
+  }
+  if (toks[ptr.i].type !== TokenType.SEMICOLON) {
+    return `unexpected token '${toks[ptr.i].literal}' expected ';'`;
+  }
+  advance(toks, ptr);
+  return VarStmt(symbol, expr);
 }
 
 // Order of Operations

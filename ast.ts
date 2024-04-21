@@ -6,10 +6,18 @@ export enum StmtType {
 
 export type Stmt = VarStmt_t | ReturnStmt_t | ExprStmt_t;
 
-interface VarStmt_t {
+export interface VarStmt_t {
   tag: StmtType.VAR;
   symbol: string;
   expr: Expr | null;
+}
+
+export function VarStmt(symbol: string, expr: Expr | null): VarStmt_t {
+  return {
+    tag: StmtType.VAR,
+    symbol,
+    expr,
+  };
 }
 
 interface ReturnStmt_t {
