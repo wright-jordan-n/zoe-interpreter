@@ -3,11 +3,11 @@ import { lex } from "./lexer.ts";
 import { parse } from "./parser.ts";
 import { Token_t } from "./token.ts";
 import { interpret } from "./interpreter.ts";
-import { Environment } from "./environment.ts";
+import { Scope } from "./scope.ts";
 
 if (Deno.args.length === 0) {
   let toks: Token_t[], stmts: Stmt[], errs: string[];
-  const env = Environment(null);
+  const env = Scope(null);
   for (let input = prompt(">"); input !== null; input = prompt(">")) {
     ({ toks, errs } = lex(input));
     console.log({ toks, errs });
@@ -24,6 +24,6 @@ if (Deno.args.length === 0) {
   console.log({ toks, errs });
   ({ stmts, errs } = parse(toks));
   console.log({ stmts, errs });
-  const rslt = interpret(stmts, Environment(null));
+  const rslt = interpret(stmts, Scope(null));
   console.log(rslt);
 }

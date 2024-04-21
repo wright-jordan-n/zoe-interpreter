@@ -8,7 +8,7 @@ import {
   Stmt,
   VarStmt_t,
 } from "./ast.ts";
-import { assignVar, Environment_t, initVar, lookupVar } from "./environment.ts";
+import { assignVar, initVar, lookupVar, Scope_t } from "./scope.ts";
 import {
   BooleanValue,
   FloatValue,
@@ -18,20 +18,20 @@ import {
   ValueType,
 } from "./runtime.ts";
 
-export function interpret(stmts: Stmt[], env: Environment_t): RuntimeValue {
+export function interpret(stmts: Stmt[], scope: Scope_t): RuntimeValue {
   let lastEval: RuntimeValue = NullValue();
   for (const stmt of stmts) {
-    lastEval = evaluate(stmt, env);
+    lastEval = evaluate(stmt, scope);
   }
   return lastEval;
 }
 
-function evaluate(node: Stmt | Expr, env: Environment_t): RuntimeValue {
+function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
   switch (node.tag) {
     case NodeType.VAR_STMT:
-      return evalVarStmt(node, env);
+      return evalVarStmt(node, scope);
     case NodeType.EXPRESSION_STMT:
-      return evalExprStmt(node, env);
+      return evalExprStmt(node, scope);
     case NodeType.INTEGER_EXPR:
       return IntegerValue(node.value);
     case NodeType.FLOAT_EXPR:
@@ -44,11 +44,11 @@ function evaluate(node: Stmt | Expr, env: Environment_t): RuntimeValue {
       }
       return BooleanValue(false);
     case NodeType.BINARY_EXPR:
-      return evalBinaryExpr(node, env);
+      return evalBinaryExpr(node, scope);
     case NodeType.IDENTIFIER_EXPR:
-      return evalIdentifierExpr(node, env);
+      return evalIdentifierExpr(node, scope);
     case NodeType.ASSIGNMENT_EXPR:
-      return evalAssignmentExpr(node, env);
+      return evalAssignmentExpr(node, scope);
     default:
       return NullValue();
   }
@@ -56,9 +56,9 @@ function evaluate(node: Stmt | Expr, env: Environment_t): RuntimeValue {
 
 // EXPRESSIONS
 
-function evalBinaryExpr(expr: BinaryExpr_t, env: Environment_t): RuntimeValue {
-  const lhs = evaluate(expr.left, env);
-  const rhs = evaluate(expr.right, env);
+function evalBinaryExpr(expr: BinaryExpr_t, scope: Scope_t): RuntimeValue {
+  const lhs = evaluate(expr.left, scope);
+  const rhs = evaluate(expr.right, scope);
   switch (expr.operator) {
     case "+":
       if (lhs.tag !== rhs.tag) {
@@ -130,21 +130,21 @@ function evalBinaryExpr(expr: BinaryExpr_t, env: Environment_t): RuntimeValue {
 
 function evalIdentifierExpr(
   expr: IdentifierExpr_t,
-  env: Environment_t,
+  scope: Scope_t,
 ): RuntimeValue {
-  return lookupVar(env, expr.symbol);
+  return lookupVar(scope, expr.symbol);
 }
 
 function evalAssignmentExpr(
   expr: AssignmentExpr_t,
-  env: Environment_t,
+  scope: Scope_t,
 ): RuntimeValue {
   switch (expr.operator) {
     case "=":
       switch (expr.assignee.tag) {
         case NodeType.IDENTIFIER_EXPR: {
-          const value = evaluate(expr.value, env);
-          assignVar(env, expr.assignee.symbol, value);
+          const value = evaluate(expr.value, scope);
+          assignVar(scope, expr.assignee.symbol, value);
           return value;
         }
         default:
@@ -159,10 +159,10 @@ function evalAssignmentExpr(
 
 // STATEMENTS
 
-function evalVarStmt(stmt: VarStmt_t, env: Environment_t): RuntimeValue {
-  return initVar(env, stmt.symbol, evaluate(stmt.expr, env));
+function evalVarStmt(stmt: VarStmt_t, scope: Scope_t): RuntimeValue {
+  return initVar(scope, stmt.symbol, evaluate(stmt.expr, scope));
 }
 
-function evalExprStmt(stmt: ExprStmt_t, env: Environment_t): RuntimeValue {
-  return evaluate(stmt.expr, env);
+function evalExprStmt(stmt: ExprStmt_t, scope: Scope_t): RuntimeValue {
+  return evaluate(stmt.expr, scope);
 }
