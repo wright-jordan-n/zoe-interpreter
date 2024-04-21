@@ -2,6 +2,7 @@ export enum NodeType {
   VAR_STMT,
   RETURN_STMT,
   EXPRESSION_STMT,
+  ASSIGNMENT_EXPR,
   BINARY_EXPR,
   IDENTIFIER_EXPR,
   INTEGER_EXPR,
@@ -48,7 +49,15 @@ export type Expr =
   | IntegerExpr_t
   | FloatExpr_t
   | NullExpr_t
-  | BooleanExpr_t;
+  | BooleanExpr_t
+  | AssignmentExpr_t;
+
+export interface AssignmentExpr_t {
+  tag: NodeType.ASSIGNMENT_EXPR;
+  assignee: Expr;
+  operator: string;
+  value: Expr;
+}
 
 export interface BinaryExpr_t {
   tag: NodeType.BINARY_EXPR;
@@ -126,6 +135,19 @@ export function NullExpr(): NullExpr_t {
 export function BooleanExpr(value: boolean): BooleanExpr_t {
   return {
     tag: NodeType.BOOLEAN_EXPR,
+    value,
+  };
+}
+
+export function AssignmentExpr(
+  assignee: Expr,
+  operator: string,
+  value: Expr,
+): AssignmentExpr_t {
+  return {
+    tag: NodeType.ASSIGNMENT_EXPR,
+    assignee,
+    operator,
     value,
   };
 }

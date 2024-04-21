@@ -1,4 +1,5 @@
 import {
+  AssignmentExpr,
   BinaryExpr,
   BooleanExpr,
   Expr,
@@ -98,7 +99,7 @@ function parseVarStmt(toks: Token_t[], ptr: { i: number }): VarStmt_t | string {
 // AssignmentExpr
 
 function parseExpr(toks: Token_t[], ptr: { i: number }): Expr | string {
-  return parseAdditiveExpr(toks, ptr);
+  return parseAssignmentExpr(toks, ptr);
 }
 
 function parsePrimaryExpr(
@@ -191,6 +192,30 @@ function parseAdditiveExpr(
       return right;
     }
     left = BinaryExpr(left, operator, right);
+  }
+  return left;
+}
+
+function parseAssignmentExpr(
+  toks: Token_t[],
+  ptr: { i: number },
+): Expr | string {
+  let left = parseAdditiveExpr(toks, ptr);
+  if (typeof left === "string") {
+    return left;
+  }
+  for (
+    let tok = toks[ptr.i];
+    tok.type === TokenType.ASSIGN;
+    tok = toks[ptr.i]
+  ) {
+    const operator = tok.literal;
+    advance(toks, ptr);
+    const right = parseAdditiveExpr(toks, ptr);
+    if (typeof right === "string") {
+      return right;
+    }
+    left = AssignmentExpr(left, operator, right);
   }
   return left;
 }

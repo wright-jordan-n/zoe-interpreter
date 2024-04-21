@@ -1,4 +1,5 @@
 import {
+  AssignmentExpr_t,
   BinaryExpr_t,
   Expr,
   ExprStmt_t,
@@ -7,7 +8,7 @@ import {
   Stmt,
   VarStmt_t,
 } from "./ast.ts";
-import { Environment_t, initVar, lookupVar } from "./environment.ts";
+import { assignVar, Environment_t, initVar, lookupVar } from "./environment.ts";
 import {
   BooleanValue,
   FloatValue,
@@ -47,6 +48,8 @@ function evaluate(node: Stmt | Expr, env: Environment_t): RuntimeValue {
       return evalBinaryExpr(node, env);
     case NodeType.IDENTIFIER_EXPR:
       return evalIdentifierExpr(node, env);
+    case NodeType.ASSIGNMENT_EXPR:
+      return evalAssignmentExpr(node, env);
     default:
       return NullValue();
   }
@@ -57,11 +60,11 @@ function evaluate(node: Stmt | Expr, env: Environment_t): RuntimeValue {
 function evalBinaryExpr(expr: BinaryExpr_t, env: Environment_t): RuntimeValue {
   const lhs = evaluate(expr.left, env);
   const rhs = evaluate(expr.right, env);
-  if (lhs.tag !== rhs.tag) {
-    throw new Error(`error: operands of different types`);
-  }
   switch (expr.operator) {
     case "+":
+      if (lhs.tag !== rhs.tag) {
+        throw new Error(`error: operands for '+' must be of the same time`);
+      }
       if (lhs.tag === ValueType.INTEGER) {
         return IntegerValue(lhs.value + (rhs.value as bigint));
       }
@@ -70,6 +73,9 @@ function evalBinaryExpr(expr: BinaryExpr_t, env: Environment_t): RuntimeValue {
       }
       throw new Error("error: operands for '+' must be of type int or float");
     case "-":
+      if (lhs.tag !== rhs.tag) {
+        throw new Error(`error: operands for '-' must be of the same time`);
+      }
       if (lhs.tag === ValueType.INTEGER) {
         return IntegerValue(lhs.value - (rhs.value as bigint));
       }
@@ -78,6 +84,9 @@ function evalBinaryExpr(expr: BinaryExpr_t, env: Environment_t): RuntimeValue {
       }
       throw new Error("error: operands for '-' must be of type int or float");
     case "*":
+      if (lhs.tag !== rhs.tag) {
+        throw new Error(`error: operands for '*' must be of the same time`);
+      }
       if (lhs.tag === ValueType.INTEGER) {
         return IntegerValue(lhs.value * (rhs.value as bigint));
       }
@@ -86,6 +95,9 @@ function evalBinaryExpr(expr: BinaryExpr_t, env: Environment_t): RuntimeValue {
       }
       throw new Error("error: operands for '*' must be of type int or float");
     case "/":
+      if (lhs.tag !== rhs.tag) {
+        throw new Error(`error: operands for '/' must be of the same time`);
+      }
       if (lhs.tag === ValueType.INTEGER) {
         if (rhs.value === 0n) {
           throw new Error("error: division by zero not allowed");
@@ -100,6 +112,9 @@ function evalBinaryExpr(expr: BinaryExpr_t, env: Environment_t): RuntimeValue {
       }
       throw new Error("error: operands for '/' must be of type int or float");
     case "%":
+      if (lhs.tag !== rhs.tag) {
+        throw new Error(`error: operands for '%' must be of the same time`);
+      }
       if (lhs.tag === ValueType.INTEGER) {
         return IntegerValue(lhs.value % (rhs.value as bigint));
       }
@@ -119,6 +134,28 @@ function evalIdentifierExpr(
   env: Environment_t,
 ): RuntimeValue {
   return lookupVar(env, expr.symbol);
+}
+
+function evalAssignmentExpr(
+  expr: AssignmentExpr_t,
+  env: Environment_t,
+): RuntimeValue {
+  switch (expr.operator) {
+    case "=":
+      switch (expr.assignee.tag) {
+        case NodeType.IDENTIFIER_EXPR: {
+          const value = evaluate(expr.value, env);
+          assignVar(env, expr.assignee.symbol, value);
+          return value;
+        }
+        default:
+          throw new Error("error: assignee must be an identifier");
+      }
+    default:
+      throw new Error(
+        `error: unable to evaluate '${expr.operator}' as assignment expression`,
+      );
+  }
 }
 
 // STATEMENTS
