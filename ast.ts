@@ -8,6 +8,8 @@ export type Stmt = VarStmt_t | ReturnStmt_t | ExprStmt_t;
 
 interface VarStmt_t {
   tag: StmtType.VAR;
+  symbol: string;
+  expr: Expr | null;
 }
 
 interface ReturnStmt_t {

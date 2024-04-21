@@ -53,7 +53,7 @@ function evalBinaryExpr(expr: BinaryExpr_t, env: Environment_t): RuntimeValue {
       if (lhs.tag === ValueType.FLOAT) {
         return FloatValue(lhs.value + (rhs.value as number));
       }
-      throw new Error("error: operands for `+` must be of type int or float");
+      throw new Error("error: operands for '+' must be of type int or float");
     case "-":
       if (lhs.tag === ValueType.INTEGER) {
         return IntegerValue(lhs.value - (rhs.value as bigint));
@@ -61,7 +61,7 @@ function evalBinaryExpr(expr: BinaryExpr_t, env: Environment_t): RuntimeValue {
       if (lhs.tag === ValueType.FLOAT) {
         return FloatValue(lhs.value - (rhs.value as number));
       }
-      throw new Error("error: operands for `-` must be of type int or float");
+      throw new Error("error: operands for '-' must be of type int or float");
     case "*":
       if (lhs.tag === ValueType.INTEGER) {
         return IntegerValue(lhs.value * (rhs.value as bigint));
@@ -69,7 +69,7 @@ function evalBinaryExpr(expr: BinaryExpr_t, env: Environment_t): RuntimeValue {
       if (lhs.tag === ValueType.FLOAT) {
         return FloatValue(lhs.value * (rhs.value as number));
       }
-      throw new Error("error: operands for `*` must be of type int or float");
+      throw new Error("error: operands for '*' must be of type int or float");
     case "/":
       if (lhs.tag === ValueType.INTEGER) {
         if (rhs.value === 0n) {
@@ -83,7 +83,7 @@ function evalBinaryExpr(expr: BinaryExpr_t, env: Environment_t): RuntimeValue {
         }
         return FloatValue(lhs.value / (rhs.value as number));
       }
-      throw new Error("error: operands for `/` must be of type int or float");
+      throw new Error("error: operands for '/' must be of type int or float");
     case "%":
       if (lhs.tag === ValueType.INTEGER) {
         return IntegerValue(lhs.value % (rhs.value as bigint));
@@ -91,9 +91,11 @@ function evalBinaryExpr(expr: BinaryExpr_t, env: Environment_t): RuntimeValue {
       if (lhs.tag === ValueType.FLOAT) {
         return FloatValue(lhs.value % (rhs.value as number));
       }
-      throw new Error("error: operands for `%` must be of type int or float");
+      throw new Error("error: operands for '%' must be of type int or float");
     default:
-      throw new Error(`unable to evaluate binary operator '${expr.operator}'`);
+      throw new Error(
+        `error: unable to evaluate '${expr.operator}' as binary operator expression`,
+      );
   }
 }
 
