@@ -2,7 +2,7 @@ import {
   BinaryExpr,
   BooleanExpr,
   Expr,
-  /*ExprStmt,*/
+  ExprStmt,
   FloatExpr,
   IdentifierExpr,
   IntegerExpr,
@@ -52,7 +52,7 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
           } else {
             advance(toks, ptr);
           }
-          stmts.push(/*ExprStmt(rslt)*/ rslt as unknown as Stmt);
+          stmts.push(ExprStmt(rslt));
         }
       }
     }
@@ -69,7 +69,7 @@ function parseVarStmt(toks: Token_t[], ptr: { i: number }): VarStmt_t | string {
   advance(toks, ptr);
   if (toks[ptr.i].type === TokenType.SEMICOLON) {
     advance(toks, ptr);
-    return VarStmt(symbol, null);
+    return VarStmt(symbol, NullExpr());
   }
   if (toks[ptr.i].type !== TokenType.ASSIGN) {
     return `unexpected token '${toks[ptr.i].literal}' expected '=' or ';'`;
