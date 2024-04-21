@@ -1,4 +1,7 @@
 var zoe = {
     age: 15,
     hungry: true,
+    children: {
+        n: 4,
+    },
 };
