@@ -5,7 +5,7 @@ import {
   ExprStmt_t,
   IdentifierExpr_t,
   NodeType,
-  ObjectExpr_t,
+  ObjectLiteralExpr_t,
   Stmt,
   VarStmt_t,
 } from "./ast.ts";
@@ -34,13 +34,13 @@ function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
       return evalVarStmt(node, scope);
     case NodeType.EXPRESSION_STMT:
       return evalExprStmt(node, scope);
-    case NodeType.INTEGER_EXPR:
+    case NodeType.INTEGER_LITERAL_EXPR:
       return IntegerValue(node.value);
-    case NodeType.FLOAT_EXPR:
+    case NodeType.FLOAT_LITERAL_EXPR:
       return FloatValue(node.value);
-    case NodeType.NULL_EXPR:
+    case NodeType.NULL_LITERAL_EXPR:
       return NullValue();
-    case NodeType.BOOLEAN_EXPR:
+    case NodeType.BOOLEAN_LITERAL_EXPR:
       if (node.value) {
         return BooleanValue(true);
       }
@@ -49,8 +49,8 @@ function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
       return evalBinaryExpr(node, scope);
     case NodeType.IDENTIFIER_EXPR:
       return evalIdentifierExpr(node, scope);
-    case NodeType.OBJECT_EXPR:
-      return evalObjectExpr(node, scope);
+    case NodeType.OBJECT_LITERAL_EXPR:
+      return evalObjectLiteralExpr(node, scope);
     case NodeType.ASSIGNMENT_EXPR:
       return evalAssignmentExpr(node, scope);
     default:
@@ -139,7 +139,10 @@ function evalIdentifierExpr(
   return lookupVar(scope, expr.symbol);
 }
 
-function evalObjectExpr(expr: ObjectExpr_t, scope: Scope_t): RuntimeValue {
+function evalObjectLiteralExpr(
+  expr: ObjectLiteralExpr_t,
+  scope: Scope_t,
+): RuntimeValue {
   const m = new Map<string, RuntimeValue>();
   for (const { symbol, value } of expr.properties) {
     if (value === null) {

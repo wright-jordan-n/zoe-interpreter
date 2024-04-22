@@ -1,14 +1,14 @@
 import {
   AssignmentExpr,
   BinaryExpr,
-  BooleanExpr,
+  BooleanLiteralExpr,
   Expr,
   ExprStmt,
-  FloatExpr,
+  FloatLiteralExpr,
   IdentifierExpr,
-  IntegerExpr,
-  NullExpr,
-  ObjectExpr,
+  IntegerLiteralExpr,
+  NullLiteralExpr,
+  ObjectLiteralExpr,
   PropertyExpr,
   PropertyExpr_t,
   Stmt,
@@ -16,6 +16,17 @@ import {
   VarStmt_t,
 } from "./ast.ts";
 import { Token_t, TokenType } from "./token.ts";
+
+// Order of Operations
+// PrimaryExpr
+// FuncCall ArraySubscript StructAccess
+// UnaryExpr
+// * / %
+// + -
+// < <= > >= == !=
+// &&
+// ||
+// AssignmentExpr
 
 function advance(toks: Token_t[], ptr: { i: number }): void {
   if (ptr.i === toks.length - 1) {
@@ -73,7 +84,7 @@ function parseVarStmt(toks: Token_t[], ptr: { i: number }): VarStmt_t | string {
   advance(toks, ptr);
   if (toks[ptr.i].type === TokenType.SEMICOLON) {
     advance(toks, ptr);
-    return VarStmt(symbol, NullExpr());
+    return VarStmt(symbol, NullLiteralExpr());
   }
   if (toks[ptr.i].type !== TokenType.ASSIGN) {
     return `unexpected token '${toks[ptr.i].literal}' expected '=' or ';'`;
@@ -90,17 +101,6 @@ function parseVarStmt(toks: Token_t[], ptr: { i: number }): VarStmt_t | string {
   return VarStmt(symbol, expr);
 }
 
-// Order of Operations
-// PrimaryExpr
-// FuncCall ArraySubscript StructAccess
-// UnaryExpr
-// * / %
-// + -
-// < <= > >= == !=
-// &&
-// ||
-// AssignmentExpr
-
 function parseExpr(toks: Token_t[], ptr: { i: number }): Expr | string {
   return parseAssignmentExpr(toks, ptr);
 }
@@ -113,13 +113,13 @@ function parsePrimaryExpr(
   switch (tok.type) {
     case TokenType.TRUE:
       advance(toks, ptr);
-      return BooleanExpr(true);
+      return BooleanLiteralExpr(true);
     case TokenType.FALSE:
       advance(toks, ptr);
-      return BooleanExpr(false);
+      return BooleanLiteralExpr(false);
     case TokenType.NULL:
       advance(toks, ptr);
-      return NullExpr();
+      return NullLiteralExpr();
     case TokenType.IDENTIFIER:
       advance(toks, ptr);
       return IdentifierExpr(tok.literal);
@@ -128,10 +128,15 @@ function parsePrimaryExpr(
     case TokenType.OCTAL:
     case TokenType.BINARY:
       advance(toks, ptr);
-      return IntegerExpr(BigInt(tok.literal));
+      return IntegerLiteralExpr(BigInt(tok.literal));
     case TokenType.FLOAT:
       advance(toks, ptr);
-      return FloatExpr(Number(tok.literal));
+      return FloatLiteralExpr(Number(tok.literal));
+    case TokenType.LBRACE:
+      // Current implementation doesn't allow arbitrary block statements.
+      // Block statments can be done by refactoring parse function to have adjsustable stopping point?
+      // Then a BlockStatment_t is an interface that holds an array of stmts.
+      return parseObjectLiteralExpr(toks, ptr);
     case TokenType.LPAREN: {
       advance(toks, ptr);
       const rslt = parseExpr(toks, ptr);
@@ -199,11 +204,35 @@ function parseAdditiveExpr(
   return left;
 }
 
-// Shouldn't this be a primary expr?
-function parseObjectExpr(toks: Token_t[], ptr: { i: number }): Expr | string {
-  if (toks[ptr.i].type !== TokenType.LBRACE) {
-    return parseAdditiveExpr(toks, ptr);
+function parseAssignmentExpr(
+  toks: Token_t[],
+  ptr: { i: number },
+): Expr | string {
+  let left = parseAdditiveExpr(toks, ptr);
+  if (typeof left === "string") {
+    return left;
   }
+  for (
+    let tok = toks[ptr.i];
+    tok.type === TokenType.ASSIGN;
+    tok = toks[ptr.i]
+  ) {
+    const operator = tok.literal;
+    advance(toks, ptr);
+    const right = parseAdditiveExpr(toks, ptr);
+    if (typeof right === "string") {
+      return right;
+    }
+    left = AssignmentExpr(left, operator, right);
+  }
+  return left;
+}
+
+/* This is just to parse a primary expr, it's not part of recursive descent chain.*/
+function parseObjectLiteralExpr(
+  toks: Token_t[],
+  ptr: { i: number },
+): Expr | string {
   advance(toks, ptr);
   const properties: PropertyExpr_t[] = [];
   for (
@@ -247,29 +276,5 @@ function parseObjectExpr(toks: Token_t[], ptr: { i: number }): Expr | string {
     }
   }
   advance(toks, ptr);
-  return ObjectExpr(properties);
-}
-
-function parseAssignmentExpr(
-  toks: Token_t[],
-  ptr: { i: number },
-): Expr | string {
-  let left = parseObjectExpr(toks, ptr);
-  if (typeof left === "string") {
-    return left;
-  }
-  for (
-    let tok = toks[ptr.i];
-    tok.type === TokenType.ASSIGN;
-    tok = toks[ptr.i]
-  ) {
-    const operator = tok.literal;
-    advance(toks, ptr);
-    const right = parseObjectExpr(toks, ptr);
-    if (typeof right === "string") {
-      return right;
-    }
-    left = AssignmentExpr(left, operator, right);
-  }
-  return left;
+  return ObjectLiteralExpr(properties);
 }

@@ -5,11 +5,11 @@ export enum NodeType {
   ASSIGNMENT_EXPR,
   BINARY_EXPR,
   IDENTIFIER_EXPR,
-  INTEGER_EXPR,
-  FLOAT_EXPR,
-  NULL_EXPR,
-  BOOLEAN_EXPR,
-  OBJECT_EXPR,
+  INTEGER_LITERAL_EXPR,
+  FLOAT_LITERAL_EXPR,
+  NULL_LITERAL_EXPR,
+  BOOLEAN_LITERAL_EXPR,
+  OBJECT_LITERAL_EXPR,
   PROPERTY_EXPR,
 }
 
@@ -48,12 +48,12 @@ export function ExprStmt(expr: Expr): ExprStmt_t {
 export type Expr =
   | BinaryExpr_t
   | IdentifierExpr_t
-  | IntegerExpr_t
-  | FloatExpr_t
-  | NullExpr_t
-  | BooleanExpr_t
+  | IntegerLiteralExpr_t
+  | FloatLiteralExpr_t
+  | NullLiteralExpr_t
+  | BooleanLiteralExpr_t
   | AssignmentExpr_t
-  | ObjectExpr_t;
+  | ObjectLiteralExpr_t;
 
 export interface AssignmentExpr_t {
   tag: NodeType.ASSIGNMENT_EXPR;
@@ -62,65 +62,24 @@ export interface AssignmentExpr_t {
   value: Expr;
 }
 
+export function AssignmentExpr(
+  assignee: Expr,
+  operator: string,
+  value: Expr,
+): AssignmentExpr_t {
+  return {
+    tag: NodeType.ASSIGNMENT_EXPR,
+    assignee,
+    operator,
+    value,
+  };
+}
+
 export interface BinaryExpr_t {
   tag: NodeType.BINARY_EXPR;
   left: Expr;
   operator: string;
   right: Expr;
-}
-
-export interface IdentifierExpr_t {
-  tag: NodeType.IDENTIFIER_EXPR;
-  symbol: string;
-}
-
-interface IntegerExpr_t {
-  tag: NodeType.INTEGER_EXPR;
-  value: bigint;
-}
-
-interface FloatExpr_t {
-  tag: NodeType.FLOAT_EXPR;
-  value: number;
-}
-
-interface NullExpr_t {
-  tag: NodeType.NULL_EXPR;
-  value: null;
-}
-
-interface BooleanExpr_t {
-  tag: NodeType.BOOLEAN_EXPR;
-  value: boolean;
-}
-
-export interface ObjectExpr_t {
-  tag: NodeType.OBJECT_EXPR;
-  properties: PropertyExpr_t[];
-}
-
-export function ObjectExpr(properties: PropertyExpr_t[]): ObjectExpr_t {
-  return {
-    tag: NodeType.OBJECT_EXPR,
-    properties,
-  };
-}
-
-export interface PropertyExpr_t {
-  tag: NodeType.PROPERTY_EXPR;
-  symbol: string;
-  value: Expr | null;
-}
-
-export function PropertyExpr(
-  symbol: string,
-  value: Expr | null,
-): PropertyExpr_t {
-  return {
-    tag: NodeType.PROPERTY_EXPR,
-    symbol,
-    value,
-  };
 }
 
 export function BinaryExpr(
@@ -136,6 +95,11 @@ export function BinaryExpr(
   };
 }
 
+export interface IdentifierExpr_t {
+  tag: NodeType.IDENTIFIER_EXPR;
+  symbol: string;
+}
+
 export function IdentifierExpr(symbol: string): IdentifierExpr_t {
   return {
     tag: NodeType.IDENTIFIER_EXPR,
@@ -143,43 +107,84 @@ export function IdentifierExpr(symbol: string): IdentifierExpr_t {
   };
 }
 
-export function IntegerExpr(value: bigint): IntegerExpr_t {
+interface IntegerLiteralExpr_t {
+  tag: NodeType.INTEGER_LITERAL_EXPR;
+  value: bigint;
+}
+
+export function IntegerLiteralExpr(value: bigint): IntegerLiteralExpr_t {
   return {
-    tag: NodeType.INTEGER_EXPR,
+    tag: NodeType.INTEGER_LITERAL_EXPR,
     value,
   };
 }
 
-export function FloatExpr(value: number): FloatExpr_t {
+interface FloatLiteralExpr_t {
+  tag: NodeType.FLOAT_LITERAL_EXPR;
+  value: number;
+}
+
+export function FloatLiteralExpr(value: number): FloatLiteralExpr_t {
   return {
-    tag: NodeType.FLOAT_EXPR,
+    tag: NodeType.FLOAT_LITERAL_EXPR,
     value,
   };
 }
 
-export function NullExpr(): NullExpr_t {
+interface NullLiteralExpr_t {
+  tag: NodeType.NULL_LITERAL_EXPR;
+  value: null;
+}
+
+export function NullLiteralExpr(): NullLiteralExpr_t {
   return {
-    tag: NodeType.NULL_EXPR,
+    tag: NodeType.NULL_LITERAL_EXPR,
     value: null,
   };
 }
 
-export function BooleanExpr(value: boolean): BooleanExpr_t {
+interface BooleanLiteralExpr_t {
+  tag: NodeType.BOOLEAN_LITERAL_EXPR;
+  value: boolean;
+}
+
+export function BooleanLiteralExpr(value: boolean): BooleanLiteralExpr_t {
   return {
-    tag: NodeType.BOOLEAN_EXPR,
+    tag: NodeType.BOOLEAN_LITERAL_EXPR,
     value,
   };
 }
 
-export function AssignmentExpr(
-  assignee: Expr,
-  operator: string,
-  value: Expr,
-): AssignmentExpr_t {
+export interface ObjectLiteralExpr_t {
+  tag: NodeType.OBJECT_LITERAL_EXPR;
+  properties: PropertyExpr_t[];
+}
+
+export function ObjectLiteralExpr(
+  properties: PropertyExpr_t[],
+): ObjectLiteralExpr_t {
   return {
-    tag: NodeType.ASSIGNMENT_EXPR,
-    assignee,
-    operator,
+    tag: NodeType.OBJECT_LITERAL_EXPR,
+    properties,
+  };
+}
+
+// Properties might not need explicit type with a tag.
+// Maybe just need to embed keyval in obj literal?
+
+export interface PropertyExpr_t {
+  tag: NodeType.PROPERTY_EXPR;
+  symbol: string;
+  value: Expr | null;
+}
+
+export function PropertyExpr(
+  symbol: string,
+  value: Expr | null,
+): PropertyExpr_t {
+  return {
+    tag: NodeType.PROPERTY_EXPR,
+    symbol,
     value,
   };
 }
