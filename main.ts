@@ -7,14 +7,14 @@ import { Scope } from "./scope.ts";
 
 if (Deno.args.length === 0) {
   let toks: Token_t[], stmts: Stmt[], errs: string[];
-  const globalScope = Scope(null);
+  // const globalScope = Scope(null);
   for (let input = prompt(">"); input !== null; input = prompt(">")) {
     ({ toks, errs } = lex(input));
     console.log({ toks, errs });
     ({ stmts, errs } = parse(toks));
     console.log({ stmts, errs });
-    const rslt = interpret(stmts, globalScope);
-    console.log(rslt.value);
+    // const rslt = interpret(stmts, globalScope);
+    // console.log(rslt.value);
   }
 } else if (Deno.args.length === 1) {
   const bytes = Deno.readFileSync(Deno.args[0]);

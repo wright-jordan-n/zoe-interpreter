@@ -2,11 +2,13 @@ import {
   AssignmentExpr,
   BinaryExpr,
   BooleanLiteralExpr,
+  CallExpr,
   Expr,
   ExprStmt,
   FloatLiteralExpr,
   IdentifierExpr,
   IntegerLiteralExpr,
+  MemberExpr,
   NullLiteralExpr,
   ObjectLiteralExpr,
   PropertyExpr,
@@ -63,7 +65,9 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
           errs.push(rslt);
         } else {
           if (toks[ptr.i].type !== TokenType.SEMICOLON) {
-            errs.push(`error: expected ';'`);
+            errs.push(
+              `error: unexpected token '${toks[ptr.i].literal}' expected ';'`,
+            );
           } else {
             advance(toks, ptr);
           }
@@ -155,11 +159,57 @@ function parsePrimaryExpr(
   }
 }
 
-function parseMultiplicativeExpr(
+function parseCallMemberExpr(
   toks: Token_t[],
   ptr: { i: number },
 ): Expr | string {
   let left = parsePrimaryExpr(toks, ptr);
+  if (typeof left === "string") {
+    return left;
+  }
+  for (
+    let tok = toks[ptr.i];
+    tok.type === TokenType.DOT || tok.type === TokenType.LPAREN;
+    tok = toks[ptr.i]
+  ) {
+    const operator = tok;
+    advance(toks, ptr);
+    if (operator.type === TokenType.DOT) {
+      if (toks[ptr.i].type !== TokenType.IDENTIFIER) {
+        return `error: unexpected token '${
+          toks[ptr.i].literal
+        }', expected identifier`;
+      }
+      const right = IdentifierExpr(toks[ptr.i].literal);
+      advance(toks, ptr);
+      left = MemberExpr(left, right);
+    } else {
+      const args: Expr[] = [];
+      for (;;) {
+        if (toks[ptr.i].type === TokenType.RPAREN) {
+          advance(toks, ptr);
+          break;
+        }
+        const expr = parseExpr(toks, ptr);
+        if (typeof expr === "string") {
+          return expr;
+        }
+        args.push(expr);
+        if (toks[ptr.i].type === TokenType.COMMA) {
+          advance(toks, ptr);
+        }
+      }
+      left = CallExpr(left, args);
+    }
+  }
+  return left;
+}
+
+function parseMultiplicativeExpr(
+  toks: Token_t[],
+  ptr: { i: number },
+): Expr | string {
+  let left = parseCallMemberExpr(toks, ptr);
   if (typeof left === "string") {
     return left;
   }
@@ -171,7 +221,7 @@ function parseMultiplicativeExpr(
   ) {
     const operator = tok.literal;
     advance(toks, ptr);
-    const right = parsePrimaryExpr(toks, ptr);
+    const right = parseCallMemberExpr(toks, ptr);
     if (typeof right === "string") {
       return right;
     }
