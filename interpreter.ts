@@ -1,6 +1,7 @@
 import {
   AssignmentExpr_t,
   BinaryExpr_t,
+  CallExpr_t,
   Expr,
   ExprStmt_t,
   IdentifierExpr_t,
@@ -56,8 +57,12 @@ function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
       return evalAssignmentExpr(node, scope);
     case NodeType.MEMBER_EXPR:
       return evalMemberExpr(node, scope);
+    case NodeType.CALL_EXPR:
+      return evalCallExpr(node, scope);
     default:
-      return NullValue();
+      throw new Error(
+        `error: encountered invalid ast node with NodeType ${node.tag}`,
+      );
   }
 }
 
@@ -146,12 +151,12 @@ function evalObjectLiteralExpr(
   expr: ObjectLiteralExpr_t,
   scope: Scope_t,
 ): RuntimeValue {
-  const m = new Map<string, RuntimeValue>();
+  const m: { [key: string]: RuntimeValue } = {};
   for (const { symbol, value } of expr.properties) {
     if (value === null) {
-      m.set(symbol, lookupVar(scope, symbol));
+      m[symbol] = lookupVar(scope, symbol);
     } else {
-      m.set(symbol, evaluate(value, scope));
+      m[symbol] = evaluate(value, scope);
     }
   }
   return ObjectValue(m);
@@ -172,7 +177,7 @@ function evalMemberExpr(expr: MemberExpr_t, scope: Scope_t) {
       "error: right hand side of dot operator must be an identifier",
     );
   }
-  const childVal = parentVal.value.get(child.symbol);
+  const childVal = parentVal.value[child.symbol];
   if (childVal === undefined) {
     throw new Error(
       `error: field ${child.symbol} is not present on calling object`,
@@ -211,7 +216,7 @@ function evalAssignmentExpr(
             );
           }
           const value = evaluate(expr.value, scope);
-          parentVal.value.set(child.symbol, value);
+          parentVal.value[child.symbol] = value;
           return value;
         }
         default:
@@ -224,6 +229,17 @@ function evalAssignmentExpr(
         `error: unable to evaluate '${expr.operator}' as assignment expression`,
       );
   }
+}
+
+function evalCallExpr(expr: CallExpr_t, scope: Scope_t): RuntimeValue {
+  const values = expr.args.map(function (expr) {
+    return evaluate(expr, scope);
+  });
+  const fn = evaluate(expr.caller, scope);
+  if (fn.tag !== ValueType.JS_FN) {
+    throw new Error("error: non function types are not callable");
+  }
+  return fn.value(values);
 }
 
 // STATEMENTS

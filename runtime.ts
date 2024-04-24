@@ -4,7 +4,7 @@ export enum ValueType {
   INTEGER,
   BOOLEAN,
   OBJECT,
-  NATIVE_FN,
+  JS_FN,
 }
 
 export type RuntimeValue =
@@ -12,7 +12,8 @@ export type RuntimeValue =
   | FloatValue_t
   | IntegerValue_t
   | BooleanValue_t
-  | ObjectValue_t;
+  | ObjectValue_t
+  | JsFnValue_t;
 
 interface NullValue_t {
   tag: ValueType.NULL;
@@ -62,13 +63,13 @@ export function BooleanValue(value: boolean): BooleanValue_t {
   };
 }
 
-interface ObjectValue_t {
+export interface ObjectValue_t {
   tag: ValueType.OBJECT;
-  value: Map<string, RuntimeValue>;
+  value: { [key: string]: RuntimeValue };
 }
 
 export function ObjectValue(
-  value: Map<string, RuntimeValue>,
+  value: { [key: string]: RuntimeValue },
 ): ObjectValue_t {
   return {
     tag: ValueType.OBJECT,
@@ -76,6 +77,16 @@ export function ObjectValue(
   };
 }
 
-// interface NavtiveFn_t {}
+interface JsFnValue_t {
+  tag: ValueType.JS_FN;
+  value: (args: RuntimeValue[]) => RuntimeValue;
+}
 
-// export function NavtiveFn(): NavtiveFn_t {}
+export function JsFnValue(
+  value: (args: RuntimeValue[]) => RuntimeValue,
+): JsFnValue_t {
+  return {
+    tag: ValueType.JS_FN,
+    value,
+  };
+}

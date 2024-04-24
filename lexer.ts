@@ -69,7 +69,9 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
             ptr.i += 1;
             next = peek(src, ptr.i + 1);
             if (!isOctal(next)) {
-              errs.push(`unexpected character '${next}', expected octal`);
+              errs.push(
+                `error: unexpected character '${next}', expected octal`,
+              );
               break;
             }
             ptr.i += 1;
@@ -87,7 +89,7 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
             ptr.i += 1;
             next = peek(src, ptr.i + 1);
             if (!isHexadecimal(next)) {
-              errs.push(`unexpected character '${next}', expected hex`);
+              errs.push(`error: unexpected character '${next}', expected hex`);
               break;
             }
             ptr.i += 1;
@@ -105,7 +107,9 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
             ptr.i += 1;
             next = peek(src, ptr.i + 1);
             if (!isBinary(next)) {
-              errs.push(`unexpected character '${next}', expected binary`);
+              errs.push(
+                `error: unexpected character '${next}', expected binary`,
+              );
               break;
             }
             ptr.i += 1;
@@ -123,7 +127,9 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
             ptr.i += 1;
             next = peek(src, ptr.i + 1);
             if (!isDigit(next)) {
-              errs.push(`unexpected character '${next}', expected digit`);
+              errs.push(
+                `error: unexpected character '${next}', expected digit`,
+              );
               break;
             }
             ptr.i += 1;
@@ -147,7 +153,9 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
               ptr.i += 1;
               next = peek(src, ptr.i + 1);
               if (!isDigit(next)) {
-                errs.push(`unexpected character '${next}', expected digit`);
+                errs.push(
+                  `error: unexpected character '${next}', expected digit`,
+                );
                 break;
               }
               ptr.i += 1;
@@ -196,7 +204,9 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
             ptr.i += 1;
             next = peek(src, ptr.i + 1);
             if (!isDigit(next)) {
-              errs.push(`unexpected character '${next}', expected digit`);
+              errs.push(
+                `error: unexpected character '${next}', expected digit`,
+              );
               break;
             }
             ptr.i += 1;
@@ -213,7 +223,7 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
           toks.push(Token(TokenType.INTEGER, literal));
           break;
         }
-        errs.push(`invalid character '${c}'`);
+        errs.push(`error: invalid character '${c}'`);
     }
   }
   toks.push(Token(TokenType.EOF, "\0"));

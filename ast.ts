@@ -173,7 +173,7 @@ export function ObjectLiteralExpr(
   };
 }
 
-interface CallExpr_t {
+export interface CallExpr_t {
   tag: NodeType.CALL_EXPR;
   caller: Expr;
   args: Expr[];
