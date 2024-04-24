@@ -1,3 +1,5 @@
+// import { RuntimeValue } from "./runtime.ts";
+
 export enum NodeType {
   VAR_STMT,
   RETURN_STMT,
@@ -47,6 +49,22 @@ export function VarStmt(symbol: string, expr: Expr): VarStmt_t {
 
 interface ReturnStmt_t {
   tag: NodeType.RETURN_STMT;
+  expr: Expr;
+}
+
+// this should probably go in runtime.ts
+// class Return extends Error {
+//   value: RuntimeValue;
+//   constructor() {
+//     super("error: return statment only allowed in statment.")
+//   }
+// }
+
+export function ReturnStmt(expr: Expr): ReturnStmt_t {
+  return {
+    tag: NodeType.RETURN_STMT,
+    expr,
+  };
 }
 
 export interface ExprStmt_t {
