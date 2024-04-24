@@ -2,6 +2,7 @@ export enum NodeType {
   VAR_STMT,
   RETURN_STMT,
   EXPRESSION_STMT,
+  BLOCK_STMT,
   ASSIGNMENT_EXPR,
   BINARY_EXPR,
   IDENTIFIER_EXPR,
@@ -13,9 +14,22 @@ export enum NodeType {
   CALL_EXPR,
   MEMBER_EXPR,
   PROPERTY_EXPR,
+  FUNCTION_LITERAL_EXPR,
 }
 
-export type Stmt = VarStmt_t | ReturnStmt_t | ExprStmt_t;
+export type Stmt = VarStmt_t | ReturnStmt_t | ExprStmt_t | BlockStmt_t;
+
+export interface BlockStmt_t {
+  tag: NodeType.BLOCK_STMT;
+  stmts: Stmt[];
+}
+
+export function BlockStmt(stmts: Stmt[]): BlockStmt_t {
+  return {
+    tag: NodeType.BLOCK_STMT,
+    stmts,
+  };
+}
 
 export interface VarStmt_t {
   tag: NodeType.VAR_STMT;
@@ -57,7 +71,8 @@ export type Expr =
   | AssignmentExpr_t
   | ObjectLiteralExpr_t
   | CallExpr_t
-  | MemberExpr_t;
+  | MemberExpr_t
+  | FunctionLiteralExpr_t;
 
 export interface AssignmentExpr_t {
   tag: NodeType.ASSIGNMENT_EXPR;
@@ -199,6 +214,11 @@ export function MemberExpr(left: Expr, right: Expr): MemberExpr_t {
     left,
     right,
   };
+}
+
+interface FunctionLiteralExpr_t {
+  tag: NodeType.FUNCTION_LITERAL_EXPR;
+  parameters: string[];
 }
 
 // Properties might not need explicit type with a tag.

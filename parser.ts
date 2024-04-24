@@ -1,6 +1,8 @@
 import {
   AssignmentExpr,
   BinaryExpr,
+  BlockStmt,
+  BlockStmt_t,
   BooleanLiteralExpr,
   CallExpr,
   Expr,
@@ -52,6 +54,15 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
     switch (toks[ptr.i].type) {
       case TokenType.VAR: {
         const rslt = parseVarStmt(toks, ptr);
+        if (typeof rslt === "string") {
+          errs.push(rslt);
+          break;
+        }
+        stmts.push(rslt);
+        break;
+      }
+      case TokenType.LBRACE: {
+        const rslt = parseBlockStmt(toks, ptr, errs);
         if (typeof rslt === "string") {
           errs.push(rslt);
           break;
@@ -153,6 +164,8 @@ function parsePrimaryExpr(
       advance(toks, ptr);
       return rslt;
     }
+    // case TokenType.FN:
+    //   return parseFunctionLiteralExpr(toks, ptr);
     default:
       advance(toks, ptr);
       return `error: unexpected token '${tok.literal}', expected expresssion`;
@@ -321,10 +334,91 @@ function parseObjectLiteralExpr(
       return `error: unexpected token '${toks[ptr.i].literal}' expected ','`;
     }
     advance(toks, ptr);
-    if (toks[ptr.i].type === TokenType.COMMA) {
-      advance(toks, ptr);
-    }
+    // if (toks[ptr.i].type === TokenType.COMMA) {
+    //   advance(toks, ptr);
+    // }
   }
   advance(toks, ptr);
   return ObjectLiteralExpr(properties);
+}
+
+// function parseFunctionLiteralExpr(
+//   toks: Token_t[],
+//   ptr: { i: number },
+// ): Expr | string {
+//   advance(toks, ptr);
+//   if (toks[ptr.i].type !== TokenType.LPAREN) {
+//     return `error: unexpected token '${toks[ptr.i].literal}' expected '('`;
+//   }
+//   advance(toks, ptr);
+//   const parameters: string[] = [];
+//   for (
+//     ;
+//     // I only need to check rparen once before loop, bc it's also handled inside, same with obj literal expr
+//     toks[ptr.i].type !== TokenType.EOF && toks[ptr.i].type !== TokenType.RPAREN;
+//   ) {
+//     if (toks[ptr.i].type !== TokenType.IDENTIFIER) {
+//       return `error: unexpected token '${
+//         toks[ptr.i].literal
+//       }' expected identifier`;
+//     }
+//     parameters.push(toks[ptr.i].literal);
+//     advance(toks, ptr);
+//     if (toks[ptr.i].type === TokenType.RPAREN) {
+//       break;
+//     }
+//     if (toks[ptr.i].type !== TokenType.COMMA) {
+//       return `error: unexpected token '${toks[ptr.i].literal}' expected ','`;
+//     }
+//     advance(toks, ptr);
+//   }
+
+// }
+
+function parseBlockStmt(
+  toks: Token_t[],
+  ptr: { i: number },
+  errs: string[],
+): BlockStmt_t {
+  advance(toks, ptr);
+  const stmts: Stmt[] = [];
+  while (toks[ptr.i].type !== TokenType.RBRACE) {
+    switch (toks[ptr.i].type) {
+      case TokenType.VAR: {
+        const rslt = parseVarStmt(toks, ptr);
+        if (typeof rslt === "string") {
+          errs.push(rslt);
+          break;
+        }
+        stmts.push(rslt);
+        break;
+      }
+      case TokenType.LBRACE: {
+        const rslt = parseBlockStmt(toks, ptr, errs);
+        if (typeof rslt === "string") {
+          errs.push(rslt);
+          break;
+        }
+        stmts.push(rslt);
+        break;
+      }
+      default: {
+        const rslt = parseExpr(toks, ptr);
+        if (typeof rslt === "string") {
+          errs.push(rslt);
+        } else {
+          if (toks[ptr.i].type !== TokenType.SEMICOLON) {
+            errs.push(
+              `error: unexpected token '${toks[ptr.i].literal}' expected ';'`,
+            );
+          } else {
+            advance(toks, ptr);
+          }
+          stmts.push(ExprStmt(rslt));
+        }
+      }
+    }
+  }
+  advance(toks, ptr);
+  return BlockStmt(stmts);
 }

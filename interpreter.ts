@@ -1,6 +1,7 @@
 import {
   AssignmentExpr_t,
   BinaryExpr_t,
+  BlockStmt_t,
   CallExpr_t,
   Expr,
   ExprStmt_t,
@@ -11,7 +12,7 @@ import {
   Stmt,
   VarStmt_t,
 } from "./ast.ts";
-import { assignVar, initVar, lookupVar, Scope_t } from "./scope.ts";
+import { assignVar, initVar, lookupVar, Scope, Scope_t } from "./scope.ts";
 import {
   BooleanValue,
   FloatValue,
@@ -59,6 +60,8 @@ function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
       return evalMemberExpr(node, scope);
     case NodeType.CALL_EXPR:
       return evalCallExpr(node, scope);
+    case NodeType.BLOCK_STMT:
+      return evalBlockStmt(node, Scope(scope));
     default:
       throw new Error(
         `error: encountered invalid ast node with NodeType ${node.tag}`,
@@ -245,9 +248,18 @@ function evalCallExpr(expr: CallExpr_t, scope: Scope_t): RuntimeValue {
 // STATEMENTS
 
 function evalVarStmt(stmt: VarStmt_t, scope: Scope_t): RuntimeValue {
-  return initVar(scope, stmt.symbol, evaluate(stmt.expr, scope));
+  initVar(scope, stmt.symbol, evaluate(stmt.expr, scope));
+  return NullValue();
 }
 
 function evalExprStmt(stmt: ExprStmt_t, scope: Scope_t): RuntimeValue {
-  return evaluate(stmt.expr, scope);
+  evaluate(stmt.expr, scope);
+  return NullValue();
+}
+
+function evalBlockStmt(block: BlockStmt_t, scope: Scope_t): RuntimeValue {
+  for (const stmt of block.stmts) {
+    evaluate(stmt, scope);
+  }
+  return NullValue();
 }

@@ -26,6 +26,7 @@ export enum TokenType {
   FALSE,
   NULL,
   VAR,
+  FN,
   IDENTIFIER,
 
   EOF,
@@ -36,6 +37,7 @@ keywords.set("var", TokenType.VAR);
 keywords.set("null", TokenType.NULL);
 keywords.set("true", TokenType.TRUE);
 keywords.set("false", TokenType.FALSE);
+keywords.set("fn", TokenType.FN);
 
 export { keywords };
 
