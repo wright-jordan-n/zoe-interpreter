@@ -16,6 +16,7 @@ import { assignVar, initVar, lookupVar, Scope, Scope_t } from "./scope.ts";
 import {
   BooleanValue,
   FloatValue,
+  FunctionValue,
   IntegerValue,
   NullValue,
   ObjectValue,
@@ -62,6 +63,8 @@ function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
       return evalCallExpr(node, scope);
     case NodeType.BLOCK_STMT:
       return evalBlockStmt(node, Scope(scope));
+    case NodeType.FUNCTION_LITERAL_EXPR:
+      return FunctionValue(node);
     default:
       throw new Error(
         `error: encountered invalid ast node with NodeType ${node.tag}`,
@@ -235,14 +238,25 @@ function evalAssignmentExpr(
 }
 
 function evalCallExpr(expr: CallExpr_t, scope: Scope_t): RuntimeValue {
-  const values = expr.args.map(function (expr) {
+  const args = expr.args.map(function (expr) {
     return evaluate(expr, scope);
   });
   const fn = evaluate(expr.caller, scope);
-  if (fn.tag !== ValueType.JS_FN) {
-    throw new Error("error: non function types are not callable");
+  if (fn.tag === ValueType.JS_FN) {
+    return fn.value(args);
+  } else if (fn.tag === ValueType.FUNCTION) {
+    if (args.length !== fn.value.parameters.length) {
+      throw new Error(
+        `error: function call expected ${fn.value.parameters.length} args, received ${args.length}`,
+      );
+    }
+    const newScope = Scope(scope);
+    for (let i = 0; i < fn.value.parameters.length; i += 1) {
+      initVar(newScope, fn.value.parameters[i], args[i]);
+    }
+    return evalBlockStmt(fn.value.block, newScope);
   }
-  return fn.value(values);
+  throw new Error("error: non function types are not callable");
 }
 
 // STATEMENTS

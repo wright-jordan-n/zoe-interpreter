@@ -1,9 +1,12 @@
+import { FunctionLiteralExpr_t } from "./ast.ts";
+
 export enum ValueType {
   NULL,
   FLOAT,
   INTEGER,
   BOOLEAN,
   OBJECT,
+  FUNCTION,
   JS_FN,
 }
 
@@ -13,7 +16,8 @@ export type RuntimeValue =
   | IntegerValue_t
   | BooleanValue_t
   | ObjectValue_t
-  | JsFnValue_t;
+  | JsFnValue_t
+  | FunctionValue_t;
 
 interface NullValue_t {
   tag: ValueType.NULL;
@@ -87,6 +91,18 @@ export function JsFnValue(
 ): JsFnValue_t {
   return {
     tag: ValueType.JS_FN,
+    value,
+  };
+}
+
+interface FunctionValue_t {
+  tag: ValueType.FUNCTION;
+  value: FunctionLiteralExpr_t;
+}
+
+export function FunctionValue(value: FunctionLiteralExpr_t): FunctionValue_t {
+  return {
+    tag: ValueType.FUNCTION,
     value,
   };
 }

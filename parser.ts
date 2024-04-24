@@ -8,6 +8,7 @@ import {
   Expr,
   ExprStmt,
   FloatLiteralExpr,
+  FunctionLiteralExpr,
   IdentifierExpr,
   IntegerLiteralExpr,
   MemberExpr,
@@ -53,7 +54,7 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
   while (toks[ptr.i].type !== TokenType.EOF) {
     switch (toks[ptr.i].type) {
       case TokenType.VAR: {
-        const rslt = parseVarStmt(toks, ptr);
+        const rslt = parseVarStmt(toks, ptr, errs);
         if (typeof rslt === "string") {
           errs.push(rslt);
           break;
@@ -63,15 +64,11 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
       }
       case TokenType.LBRACE: {
         const rslt = parseBlockStmt(toks, ptr, errs);
-        if (typeof rslt === "string") {
-          errs.push(rslt);
-          break;
-        }
         stmts.push(rslt);
         break;
       }
       default: {
-        const rslt = parseExpr(toks, ptr);
+        const rslt = parseExpr(toks, ptr, errs);
         if (typeof rslt === "string") {
           errs.push(rslt);
         } else {
@@ -90,7 +87,11 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
   return { stmts, errs };
 }
 
-function parseVarStmt(toks: Token_t[], ptr: { i: number }): VarStmt_t | string {
+function parseVarStmt(
+  toks: Token_t[],
+  ptr: { i: number },
+  errs: string[],
+): VarStmt_t | string {
   advance(toks, ptr);
   if (toks[ptr.i].type !== TokenType.IDENTIFIER) {
     return `unexpected token '${toks[ptr.i].literal}' expected identifier`;
@@ -105,7 +106,7 @@ function parseVarStmt(toks: Token_t[], ptr: { i: number }): VarStmt_t | string {
     return `unexpected token '${toks[ptr.i].literal}' expected '=' or ';'`;
   }
   advance(toks, ptr);
-  const expr = parseExpr(toks, ptr);
+  const expr = parseExpr(toks, ptr, errs);
   if (typeof expr === "string") {
     return expr;
   }
@@ -116,13 +117,18 @@ function parseVarStmt(toks: Token_t[], ptr: { i: number }): VarStmt_t | string {
   return VarStmt(symbol, expr);
 }
 
-function parseExpr(toks: Token_t[], ptr: { i: number }): Expr | string {
-  return parseAssignmentExpr(toks, ptr);
+function parseExpr(
+  toks: Token_t[],
+  ptr: { i: number },
+  errs: string[],
+): Expr | string {
+  return parseAssignmentExpr(toks, ptr, errs);
 }
 
 function parsePrimaryExpr(
   toks: Token_t[],
   ptr: { i: number },
+  errs: string[],
 ): Expr | string {
   const tok = toks[ptr.i];
   switch (tok.type) {
@@ -151,10 +157,10 @@ function parsePrimaryExpr(
       // Current implementation doesn't allow arbitrary block statements.
       // Block statments can be done by refactoring parse function to have adjsustable stopping point?
       // Then a BlockStatment_t is an interface that holds an array of stmts.
-      return parseObjectLiteralExpr(toks, ptr);
+      return parseObjectLiteralExpr(toks, ptr, errs);
     case TokenType.LPAREN: {
       advance(toks, ptr);
-      const rslt = parseExpr(toks, ptr);
+      const rslt = parseExpr(toks, ptr, errs);
       if (typeof rslt === "string") {
         return rslt;
       }
@@ -164,8 +170,8 @@ function parsePrimaryExpr(
       advance(toks, ptr);
       return rslt;
     }
-    // case TokenType.FN:
-    //   return parseFunctionLiteralExpr(toks, ptr);
+    case TokenType.FN:
+      return parseFunctionLiteralExpr(toks, ptr, errs);
     default:
       advance(toks, ptr);
       return `error: unexpected token '${tok.literal}', expected expresssion`;
@@ -175,8 +181,9 @@ function parsePrimaryExpr(
 function parseCallMemberExpr(
   toks: Token_t[],
   ptr: { i: number },
+  errs: string[],
 ): Expr | string {
-  let left = parsePrimaryExpr(toks, ptr);
+  let left = parsePrimaryExpr(toks, ptr, errs);
   if (typeof left === "string") {
     return left;
   }
@@ -203,7 +210,7 @@ function parseCallMemberExpr(
           advance(toks, ptr);
           break;
         }
-        const expr = parseExpr(toks, ptr);
+        const expr = parseExpr(toks, ptr, errs);
         if (typeof expr === "string") {
           return expr;
         }
@@ -221,8 +228,9 @@ function parseCallMemberExpr(
 function parseMultiplicativeExpr(
   toks: Token_t[],
   ptr: { i: number },
+  errs: string[],
 ): Expr | string {
-  let left = parseCallMemberExpr(toks, ptr);
+  let left = parseCallMemberExpr(toks, ptr, errs);
   if (typeof left === "string") {
     return left;
   }
@@ -234,7 +242,7 @@ function parseMultiplicativeExpr(
   ) {
     const operator = tok.literal;
     advance(toks, ptr);
-    const right = parseCallMemberExpr(toks, ptr);
+    const right = parseCallMemberExpr(toks, ptr, errs);
     if (typeof right === "string") {
       return right;
     }
@@ -246,8 +254,9 @@ function parseMultiplicativeExpr(
 function parseAdditiveExpr(
   toks: Token_t[],
   ptr: { i: number },
+  errs: string[],
 ): Expr | string {
-  let left = parseMultiplicativeExpr(toks, ptr);
+  let left = parseMultiplicativeExpr(toks, ptr, errs);
   if (typeof left === "string") {
     return left;
   }
@@ -258,7 +267,7 @@ function parseAdditiveExpr(
   ) {
     const operator = tok.literal;
     advance(toks, ptr);
-    const right = parseMultiplicativeExpr(toks, ptr);
+    const right = parseMultiplicativeExpr(toks, ptr, errs);
     if (typeof right === "string") {
       return right;
     }
@@ -270,8 +279,9 @@ function parseAdditiveExpr(
 function parseAssignmentExpr(
   toks: Token_t[],
   ptr: { i: number },
+  errs: string[],
 ): Expr | string {
-  let left = parseAdditiveExpr(toks, ptr);
+  let left = parseAdditiveExpr(toks, ptr, errs);
   if (typeof left === "string") {
     return left;
   }
@@ -282,7 +292,7 @@ function parseAssignmentExpr(
   ) {
     const operator = tok.literal;
     advance(toks, ptr);
-    const right = parseAdditiveExpr(toks, ptr);
+    const right = parseAdditiveExpr(toks, ptr, errs);
     if (typeof right === "string") {
       return right;
     }
@@ -295,6 +305,7 @@ function parseAssignmentExpr(
 function parseObjectLiteralExpr(
   toks: Token_t[],
   ptr: { i: number },
+  errs: string[],
 ): Expr | string {
   advance(toks, ptr);
   const properties: PropertyExpr_t[] = [];
@@ -322,7 +333,7 @@ function parseObjectLiteralExpr(
       return `error: unexpected token '${toks[ptr.i].literal}', expected ':'`;
     }
     advance(toks, ptr);
-    const value = parseExpr(toks, ptr);
+    const value = parseExpr(toks, ptr, errs);
     if (typeof value === "string") {
       return value;
     }
@@ -342,38 +353,47 @@ function parseObjectLiteralExpr(
   return ObjectLiteralExpr(properties);
 }
 
-// function parseFunctionLiteralExpr(
-//   toks: Token_t[],
-//   ptr: { i: number },
-// ): Expr | string {
-//   advance(toks, ptr);
-//   if (toks[ptr.i].type !== TokenType.LPAREN) {
-//     return `error: unexpected token '${toks[ptr.i].literal}' expected '('`;
-//   }
-//   advance(toks, ptr);
-//   const parameters: string[] = [];
-//   for (
-//     ;
-//     // I only need to check rparen once before loop, bc it's also handled inside, same with obj literal expr
-//     toks[ptr.i].type !== TokenType.EOF && toks[ptr.i].type !== TokenType.RPAREN;
-//   ) {
-//     if (toks[ptr.i].type !== TokenType.IDENTIFIER) {
-//       return `error: unexpected token '${
-//         toks[ptr.i].literal
-//       }' expected identifier`;
-//     }
-//     parameters.push(toks[ptr.i].literal);
-//     advance(toks, ptr);
-//     if (toks[ptr.i].type === TokenType.RPAREN) {
-//       break;
-//     }
-//     if (toks[ptr.i].type !== TokenType.COMMA) {
-//       return `error: unexpected token '${toks[ptr.i].literal}' expected ','`;
-//     }
-//     advance(toks, ptr);
-//   }
-
-// }
+function parseFunctionLiteralExpr(
+  toks: Token_t[],
+  ptr: { i: number },
+  errs: string[],
+): Expr | string {
+  advance(toks, ptr);
+  if (toks[ptr.i].type !== TokenType.LPAREN) {
+    return `error: unexpected token '${toks[ptr.i].literal}' expected '('`;
+  }
+  advance(toks, ptr);
+  const parameters: string[] = [];
+  for (
+    ;
+    // I only need to check rparen once before loop, bc it's also handled inside, same with obj literal expr
+    toks[ptr.i].type !== TokenType.EOF && toks[ptr.i].type !== TokenType.RPAREN;
+  ) {
+    if (toks[ptr.i].type !== TokenType.IDENTIFIER) {
+      return `error: unexpected token '${
+        toks[ptr.i].literal
+      }' expected identifier`;
+    }
+    parameters.push(toks[ptr.i].literal);
+    advance(toks, ptr);
+    if (toks[ptr.i].type === TokenType.RPAREN) {
+      break;
+    }
+    if (toks[ptr.i].type !== TokenType.COMMA) {
+      return `error: unexpected token '${toks[ptr.i].literal}' expected ','`;
+    }
+    advance(toks, ptr);
+  }
+  if (toks[ptr.i].type !== TokenType.RPAREN) {
+    return `error: unexpected token '${toks[ptr.i].literal}' expected ')'`;
+  }
+  advance(toks, ptr);
+  if (toks[ptr.i].type !== TokenType.LBRACE) {
+    return `error: unexpected token '${toks[ptr.i].literal}' expected '{'`;
+  }
+  const block = parseBlockStmt(toks, ptr, errs);
+  return FunctionLiteralExpr(parameters, block);
+}
 
 function parseBlockStmt(
   toks: Token_t[],
@@ -382,10 +402,12 @@ function parseBlockStmt(
 ): BlockStmt_t {
   advance(toks, ptr);
   const stmts: Stmt[] = [];
-  while (toks[ptr.i].type !== TokenType.RBRACE) {
+  while (
+    toks[ptr.i].type !== TokenType.EOF && toks[ptr.i].type !== TokenType.RBRACE
+  ) {
     switch (toks[ptr.i].type) {
       case TokenType.VAR: {
-        const rslt = parseVarStmt(toks, ptr);
+        const rslt = parseVarStmt(toks, ptr, errs);
         if (typeof rslt === "string") {
           errs.push(rslt);
           break;
@@ -403,7 +425,7 @@ function parseBlockStmt(
         break;
       }
       default: {
-        const rslt = parseExpr(toks, ptr);
+        const rslt = parseExpr(toks, ptr, errs);
         if (typeof rslt === "string") {
           errs.push(rslt);
         } else {
@@ -418,6 +440,10 @@ function parseBlockStmt(
         }
       }
     }
+  }
+  if (toks[ptr.i].type !== TokenType.RBRACE) {
+    errs.push(`error: unexpected token '${toks[ptr.i].literal}' expected '}'`);
+    return BlockStmt(stmts);
   }
   advance(toks, ptr);
   return BlockStmt(stmts);

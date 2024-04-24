@@ -31,6 +31,8 @@ function stringifyZoeValue(rv: RuntimeValue): string {
       return stringifyZoeObject(rv);
     case ValueType.JS_FN:
       return "[JavaScript Function]";
+    case ValueType.FUNCTION:
+      return `[Zoe Function]`;
   }
 }
 
@@ -94,6 +96,7 @@ if (Deno.args.length === 0) {
         console.log(err);
       }
     }
+    console.log(toks);
     ({ stmts, errs: parseErrs } = parse(toks));
     if (parseErrs.length !== 0) {
       hasError = true;
@@ -101,6 +104,7 @@ if (Deno.args.length === 0) {
         console.log(err);
       }
     }
+    console.log(stmts);
     if (!hasError) {
       interpret(stmts, globalScope);
     }

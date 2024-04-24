@@ -216,9 +216,21 @@ export function MemberExpr(left: Expr, right: Expr): MemberExpr_t {
   };
 }
 
-interface FunctionLiteralExpr_t {
+export interface FunctionLiteralExpr_t {
   tag: NodeType.FUNCTION_LITERAL_EXPR;
   parameters: string[];
+  block: BlockStmt_t;
+}
+
+export function FunctionLiteralExpr(
+  parameters: string[],
+  block: BlockStmt_t,
+): FunctionLiteralExpr_t {
+  return {
+    tag: NodeType.FUNCTION_LITERAL_EXPR,
+    parameters,
+    block,
+  };
 }
 
 // Properties might not need explicit type with a tag.
