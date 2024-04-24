@@ -4,6 +4,7 @@ import {
   Expr,
   ExprStmt_t,
   IdentifierExpr_t,
+  MemberExpr_t,
   NodeType,
   ObjectLiteralExpr_t,
   Stmt,
@@ -53,6 +54,8 @@ function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
       return evalObjectLiteralExpr(node, scope);
     case NodeType.ASSIGNMENT_EXPR:
       return evalAssignmentExpr(node, scope);
+    case NodeType.MEMBER_EXPR:
+      return evalMemberExpr(node, scope);
     default:
       return NullValue();
   }
@@ -154,6 +157,30 @@ function evalObjectLiteralExpr(
   return ObjectValue(m);
 }
 
+function evalMemberExpr(expr: MemberExpr_t, scope: Scope_t) {
+  const parentVal = evaluate(expr.left, scope);
+  const child = expr.right;
+  if (
+    parentVal.tag !== ValueType.OBJECT
+  ) {
+    throw new Error(
+      "error: dot operator can only be called on type object",
+    );
+  }
+  if (child.tag !== NodeType.IDENTIFIER_EXPR) {
+    throw new Error(
+      "error: right hand side of dot operator must be an identifier",
+    );
+  }
+  const childVal = parentVal.value.get(child.symbol);
+  if (childVal === undefined) {
+    throw new Error(
+      `error: field ${child.symbol} is not present on calling object`,
+    );
+  }
+  return childVal;
+}
+
 // I might want to swap these switches.
 function evalAssignmentExpr(
   expr: AssignmentExpr_t,
@@ -167,8 +194,30 @@ function evalAssignmentExpr(
           assignVar(scope, expr.assignee.symbol, value);
           return value;
         }
+        case NodeType.MEMBER_EXPR: {
+          console.log("member expr time!");
+          const parentVal = evaluate(expr.assignee.left, scope);
+          const child = expr.assignee.right;
+          if (
+            parentVal.tag !== ValueType.OBJECT
+          ) {
+            throw new Error(
+              "error: dot operator can only be called on type object",
+            );
+          }
+          if (child.tag !== NodeType.IDENTIFIER_EXPR) {
+            throw new Error(
+              "error: right hand side of dot operator must be an identifier",
+            );
+          }
+          const value = evaluate(expr.value, scope);
+          parentVal.value.set(child.symbol, value);
+          return value;
+        }
         default:
-          throw new Error("error: assignee must be an identifier");
+          throw new Error(
+            "error: assignee must be an identifier or object property",
+          );
       }
     default:
       throw new Error(

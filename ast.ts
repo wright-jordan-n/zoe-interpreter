@@ -187,7 +187,7 @@ export function CallExpr(caller: Expr, args: Expr[]): CallExpr_t {
   };
 }
 
-interface MemberExpr_t {
+export interface MemberExpr_t {
   tag: NodeType.MEMBER_EXPR;
   left: Expr;
   right: Expr;

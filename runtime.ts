@@ -4,6 +4,7 @@ export enum ValueType {
   INTEGER,
   BOOLEAN,
   OBJECT,
+  NATIVE_FN,
 }
 
 export type RuntimeValue =
@@ -74,3 +75,7 @@ export function ObjectValue(
     value,
   };
 }
+
+// interface NavtiveFn_t {}
+
+// export function NavtiveFn(): NavtiveFn_t {}

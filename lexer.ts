@@ -222,7 +222,7 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
 
 function isAlpha(c: string): boolean {
   const byte = c.charCodeAt(0);
-  return (97 <= byte && byte <= 127) || (65 <= byte && byte <= 90) ||
+  return (97 <= byte && byte <= 122) || (65 <= byte && byte <= 90) ||
     (byte === 95);
 }
 
@@ -248,7 +248,7 @@ function isHexadecimal(c: string) {
 
 function isAlphaNumeric(c: string) {
   const byte = c.charCodeAt(0);
-  return (48 <= byte && byte <= 57) || (97 <= byte && byte <= 127) ||
+  return (48 <= byte && byte <= 57) || (97 <= byte && byte <= 122) ||
     (65 <= byte && byte <= 90) || (byte === 95);
 }
 

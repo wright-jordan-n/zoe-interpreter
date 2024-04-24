@@ -1,9 +1,1 @@
-var zoe = {
-    age: 15,
-    hungry: true,
-    children: {
-        n: 4,
-    },
-};
-
-var t = { zoe };
+var zoe = {age: 15, alive: false,};
