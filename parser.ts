@@ -362,7 +362,7 @@ function parseComparisonExpr(
   return left;
 }
 
-function parseAssignmentExpr(
+function parseAndExpr(
   toks: Token_t[],
   ptr: { i: number },
   errs: string[],
@@ -373,12 +373,62 @@ function parseAssignmentExpr(
   }
   for (
     let tok = toks[ptr.i];
-    tok.type === TokenType.ASSIGN;
+    tok.type === TokenType.AND;
     tok = toks[ptr.i]
   ) {
     const operator = tok.literal;
     advance(toks, ptr);
     const right = parseComparisonExpr(toks, ptr, errs);
+    if (typeof right === "string") {
+      return right;
+    }
+    left = BinaryExpr(left, operator, right);
+  }
+  return left;
+}
+
+function parseOrExpr(
+  toks: Token_t[],
+  ptr: { i: number },
+  errs: string[],
+): Expr | string {
+  let left = parseAndExpr(toks, ptr, errs);
+  if (typeof left === "string") {
+    return left;
+  }
+  for (
+    let tok = toks[ptr.i];
+    tok.type === TokenType.OR;
+    tok = toks[ptr.i]
+  ) {
+    const operator = tok.literal;
+    advance(toks, ptr);
+    const right = parseAndExpr(toks, ptr, errs);
+    if (typeof right === "string") {
+      return right;
+    }
+    left = BinaryExpr(left, operator, right);
+  }
+  return left;
+}
+
+function parseAssignmentExpr(
+  toks: Token_t[],
+  ptr: { i: number },
+  errs: string[],
+): Expr | string {
+  let left = parseOrExpr(toks, ptr, errs);
+  if (typeof left === "string") {
+    return left;
+  }
+  for (
+    let tok = toks[ptr.i];
+    tok.type === TokenType.ASSIGN;
+    tok = toks[ptr.i]
+  ) {
+    const operator = tok.literal;
+    advance(toks, ptr);
+    const right = parseOrExpr(toks, ptr, errs);
     if (typeof right === "string") {
       return right;
     }

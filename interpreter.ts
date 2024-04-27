@@ -116,6 +116,20 @@ function evalBinaryExpr(expr: BinaryExpr_t, scope: Scope_t): RuntimeValue {
   const lhs = evaluate(expr.left, scope);
   const rhs = evaluate(expr.right, scope);
   switch (expr.operator) {
+    case "and":
+      if (lhs.tag !== ValueType.BOOLEAN || rhs.tag !== ValueType.BOOLEAN) {
+        throw new Error(
+          "error: both sides of 'and' operator must be boolean expressions",
+        );
+      }
+      return BooleanValue(lhs.value && rhs.value);
+    case "or":
+      if (lhs.tag !== ValueType.BOOLEAN || rhs.tag !== ValueType.BOOLEAN) {
+        throw new Error(
+          "error: both sides of 'or' operator must be boolean expressions",
+        );
+      }
+      return BooleanValue(lhs.value || rhs.value);
     case "==":
       if (lhs.value === rhs.value) {
         return BooleanValue(true);
