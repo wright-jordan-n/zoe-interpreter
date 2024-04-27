@@ -120,6 +120,7 @@ if (Deno.args.length === 0) {
   let toks: Token_t[], stmts: Stmt[], lexErrs: string[], parseErrs: string[];
   let hasError = false;
   ({ toks, errs: lexErrs } = lex(src));
+  console.log(toks);
   if (lexErrs.length !== 0) {
     hasError = true;
     for (const err of lexErrs) {
@@ -127,6 +128,7 @@ if (Deno.args.length === 0) {
     }
   }
   ({ stmts, errs: parseErrs } = parse(toks));
+  console.log(stmts);
   if (parseErrs.length !== 0) {
     hasError = true;
     for (const err of parseErrs) {

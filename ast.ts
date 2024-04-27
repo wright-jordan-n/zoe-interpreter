@@ -3,6 +3,7 @@ export enum NodeType {
   RETURN_STMT,
   EXPRESSION_STMT,
   BLOCK_STMT,
+  IF_STMT,
   ASSIGNMENT_EXPR,
   BINARY_EXPR,
   IDENTIFIER_EXPR,
@@ -18,7 +19,29 @@ export enum NodeType {
   UNARY_EXPR,
 }
 
-export type Stmt = VarStmt_t | ReturnStmt_t | ExprStmt_t | BlockStmt_t;
+export type Stmt =
+  | VarStmt_t
+  | ReturnStmt_t
+  | ExprStmt_t
+  | BlockStmt_t
+  | IfStmt_t;
+
+export interface IfStmt_t {
+  tag: NodeType.IF_STMT;
+  ifs: { condition: Expr; block: BlockStmt_t }[];
+  dflt: BlockStmt_t | null;
+}
+
+export function IfStmt(
+  ifs: { condition: Expr; block: BlockStmt_t }[],
+  dflt: BlockStmt_t | null,
+): IfStmt_t {
+  return {
+    tag: NodeType.IF_STMT,
+    ifs,
+    dflt,
+  };
+}
 
 export interface BlockStmt_t {
   tag: NodeType.BLOCK_STMT;

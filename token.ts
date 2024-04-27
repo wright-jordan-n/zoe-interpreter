@@ -36,6 +36,8 @@ export enum TokenType {
   IDENTIFIER,
   AND,
   OR,
+  IF,
+  ELSE,
 
   EOF,
 }
@@ -49,6 +51,8 @@ keywords.set("fn", TokenType.FN);
 keywords.set("return", TokenType.RETURN);
 keywords.set("and", TokenType.AND);
 keywords.set("or", TokenType.OR);
+keywords.set("if", TokenType.IF);
+keywords.set("else", TokenType.ELSE);
 
 export { keywords };
 

@@ -6,6 +6,7 @@ import {
   Expr,
   ExprStmt_t,
   IdentifierExpr_t,
+  IfStmt_t,
   MemberExpr_t,
   NodeType,
   ObjectLiteralExpr_t,
@@ -71,6 +72,8 @@ function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
       return evalReturnStmt(node, scope);
     case NodeType.UNARY_EXPR:
       return evalUnaryExpr(node, scope);
+    case NodeType.IF_STMT:
+      return evalIfStmt(node, scope);
       // default:
       //   throw new Error(
       //     `error: encountered invalid ast node with NodeType ${node.tag}`,
@@ -375,4 +378,21 @@ class Return extends Error {
 function evalReturnStmt(stmt: ReturnStmt_t, scope: Scope_t): RuntimeValue {
   const value = evaluate(stmt.expr, scope);
   throw new Return(value);
+}
+
+function evalIfStmt(stmt: IfStmt_t, scope: Scope_t): RuntimeValue {
+  for (const sect of stmt.ifs) {
+    const rv = evaluate(sect.condition, scope);
+    if (rv.tag !== ValueType.BOOLEAN) {
+      throw new Error("error: if condition must be a boolean expression");
+    }
+    if (rv.value === true) {
+      evalBlockStmt(sect.block, Scope(scope));
+      return NullValue();
+    }
+  }
+  if (stmt.dflt !== null) {
+    evalBlockStmt(stmt.dflt, Scope(scope));
+  }
+  return NullValue();
 }

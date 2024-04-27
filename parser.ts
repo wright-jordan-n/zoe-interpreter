@@ -10,6 +10,8 @@ import {
   FloatLiteralExpr,
   FunctionLiteralExpr,
   IdentifierExpr,
+  IfStmt,
+  IfStmt_t,
   IntegerLiteralExpr,
   MemberExpr,
   NullLiteralExpr,
@@ -79,6 +81,15 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
         stmts.push(rslt);
         break;
       }
+      case TokenType.IF: {
+        const rslt = parseIfStmt(toks, ptr, errs);
+        if (typeof rslt === "string") {
+          errs.push(rslt);
+          break;
+        }
+        stmts.push(rslt);
+        break;
+      }
       default: {
         const rslt = parseExpr(toks, ptr, errs);
         if (typeof rslt === "string") {
@@ -144,6 +155,47 @@ function parseReturnStmt(
   }
   advance(toks, ptr);
   return ReturnStmt(expr);
+}
+
+function parseIfStmt(
+  toks: Token_t[],
+  ptr: { i: number },
+  errs: string[],
+): IfStmt_t | string {
+  advance(toks, ptr);
+  const ifs: { condition: Expr; block: BlockStmt_t }[] = [];
+  let dflt: BlockStmt_t | null = null;
+  let condition = parseExpr(toks, ptr, errs);
+  if (typeof condition === "string") {
+    return condition;
+  }
+  if (toks[ptr.i].type !== TokenType.LBRACE) {
+    return `error: unexpected token '${toks[ptr.i].literal}', expected '{'`;
+  }
+  let block = parseBlockStmt(toks, ptr, errs);
+  ifs.push({ condition, block });
+  for (; toks[ptr.i].type === TokenType.ELSE;) {
+    advance(toks, ptr);
+    if (toks[ptr.i].type === TokenType.IF) {
+      advance(toks, ptr);
+      condition = parseExpr(toks, ptr, errs);
+      if (typeof condition === "string") {
+        return condition;
+      }
+      if (toks[ptr.i].type !== TokenType.LBRACE) {
+        return `error: unexpected token '${toks[ptr.i].literal}', expected '{'`;
+      }
+      block = parseBlockStmt(toks, ptr, errs);
+      ifs.push({ condition, block });
+    } else {
+      if (toks[ptr.i].type !== TokenType.LBRACE) {
+        return `error: unexpected token '${toks[ptr.i].literal}', expected '{'`;
+      }
+      dflt = parseBlockStmt(toks, ptr, errs);
+      break;
+    }
+  }
+  return IfStmt(ifs, dflt);
 }
 
 function parseExpr(
@@ -562,6 +614,15 @@ function parseBlockStmt(
       }
       case TokenType.LBRACE: {
         const rslt = parseBlockStmt(toks, ptr, errs);
+        if (typeof rslt === "string") {
+          errs.push(rslt);
+          break;
+        }
+        stmts.push(rslt);
+        break;
+      }
+      case TokenType.IF: {
+        const rslt = parseIfStmt(toks, ptr, errs);
         if (typeof rslt === "string") {
           errs.push(rslt);
           break;
