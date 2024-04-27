@@ -16,7 +16,10 @@ import {
   ObjectLiteralExpr,
   PropertyExpr,
   PropertyExpr_t,
+  ReturnStmt,
+  ReturnStmt_t,
   Stmt,
+  UnaryExpr,
   VarStmt,
   VarStmt_t,
 } from "./ast.ts";
@@ -55,6 +58,15 @@ export function parse(toks: Token_t[]): { stmts: Stmt[]; errs: string[] } {
     switch (toks[ptr.i].type) {
       case TokenType.VAR: {
         const rslt = parseVarStmt(toks, ptr, errs);
+        if (typeof rslt === "string") {
+          errs.push(rslt);
+          break;
+        }
+        stmts.push(rslt);
+        break;
+      }
+      case TokenType.RETURN: {
+        const rslt = parseReturnStmt(toks, ptr, errs);
         if (typeof rslt === "string") {
           errs.push(rslt);
           break;
@@ -117,6 +129,23 @@ function parseVarStmt(
   return VarStmt(symbol, expr);
 }
 
+function parseReturnStmt(
+  toks: Token_t[],
+  ptr: { i: number },
+  errs: string[],
+): ReturnStmt_t | string {
+  advance(toks, ptr);
+  const expr = parseExpr(toks, ptr, errs);
+  if (typeof expr === "string") {
+    return expr;
+  }
+  if (toks[ptr.i].type !== TokenType.SEMICOLON) {
+    return `unexpected token '${toks[ptr.i].literal}', expected ';'`;
+  }
+  advance(toks, ptr);
+  return ReturnStmt(expr);
+}
+
 function parseExpr(
   toks: Token_t[],
   ptr: { i: number },
@@ -132,6 +161,10 @@ function parsePrimaryExpr(
 ): Expr | string {
   const tok = toks[ptr.i];
   switch (tok.type) {
+    // case TokenType.SUBTRACT:
+    // case TokenType.NOT:
+    //   advance(toks, ptr);
+    //   return parseUnaryExpr(toks, ptr, errs);
     case TokenType.TRUE:
       advance(toks, ptr);
       return BooleanLiteralExpr(true);
@@ -225,12 +258,39 @@ function parseCallMemberExpr(
   return left;
 }
 
+function parseUnaryExpr(
+  toks: Token_t[],
+  ptr: { i: number },
+  errs: string[],
+): Expr | string {
+  if (
+    toks[ptr.i].type !== TokenType.SUBTRACT &&
+    toks[ptr.i].type !== TokenType.NOT
+  ) {
+    return parseCallMemberExpr(toks, ptr, errs);
+  }
+  let expr: Expr | string;
+  do {
+    const operator = toks[ptr.i].literal;
+    advance(toks, ptr);
+    expr = parseCallMemberExpr(toks, ptr, errs);
+    if (typeof expr === "string") {
+      return expr;
+    }
+    expr = UnaryExpr(operator, expr);
+  } while (
+    toks[ptr.i].type === TokenType.SUBTRACT ||
+    toks[ptr.i].type === TokenType.NOT
+  );
+  return expr;
+}
+
 function parseMultiplicativeExpr(
   toks: Token_t[],
   ptr: { i: number },
   errs: string[],
 ): Expr | string {
-  let left = parseCallMemberExpr(toks, ptr, errs);
+  let left = parseUnaryExpr(toks, ptr, errs);
   if (typeof left === "string") {
     return left;
   }
@@ -242,7 +302,7 @@ function parseMultiplicativeExpr(
   ) {
     const operator = tok.literal;
     advance(toks, ptr);
-    const right = parseCallMemberExpr(toks, ptr, errs);
+    const right = parseUnaryExpr(toks, ptr, errs);
     if (typeof right === "string") {
       return right;
     }
@@ -276,7 +336,7 @@ function parseAdditiveExpr(
   return left;
 }
 
-function parseAssignmentExpr(
+function parseComparisonExpr(
   toks: Token_t[],
   ptr: { i: number },
   errs: string[],
@@ -287,12 +347,38 @@ function parseAssignmentExpr(
   }
   for (
     let tok = toks[ptr.i];
-    tok.type === TokenType.ASSIGN;
+    tok.type === TokenType.EQUAL || tok.type === TokenType.NOT_EQUAL ||
+    tok.type === TokenType.LESS_THAN || tok.type === TokenType.GREATER_THAN;
     tok = toks[ptr.i]
   ) {
     const operator = tok.literal;
     advance(toks, ptr);
     const right = parseAdditiveExpr(toks, ptr, errs);
+    if (typeof right === "string") {
+      return right;
+    }
+    left = BinaryExpr(left, operator, right);
+  }
+  return left;
+}
+
+function parseAssignmentExpr(
+  toks: Token_t[],
+  ptr: { i: number },
+  errs: string[],
+): Expr | string {
+  let left = parseComparisonExpr(toks, ptr, errs);
+  if (typeof left === "string") {
+    return left;
+  }
+  for (
+    let tok = toks[ptr.i];
+    tok.type === TokenType.ASSIGN;
+    tok = toks[ptr.i]
+  ) {
+    const operator = tok.literal;
+    advance(toks, ptr);
+    const right = parseComparisonExpr(toks, ptr, errs);
     if (typeof right === "string") {
       return right;
     }
@@ -408,6 +494,15 @@ function parseBlockStmt(
     switch (toks[ptr.i].type) {
       case TokenType.VAR: {
         const rslt = parseVarStmt(toks, ptr, errs);
+        if (typeof rslt === "string") {
+          errs.push(rslt);
+          break;
+        }
+        stmts.push(rslt);
+        break;
+      }
+      case TokenType.RETURN: {
+        const rslt = parseReturnStmt(toks, ptr, errs);
         if (typeof rslt === "string") {
           errs.push(rslt);
           break;

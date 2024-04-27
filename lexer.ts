@@ -13,7 +13,26 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
       case "\r":
       case "\n":
         break;
+      case ">":
+        toks.push(Token(TokenType.GREATER_THAN, c));
+        break;
+      case "<":
+        toks.push(Token(TokenType.LESS_THAN, c));
+        break;
+      case "!":
+        if (peek(src, ptr.i + 1) === "=") {
+          ptr.i += 1;
+          toks.push(Token(TokenType.NOT_EQUAL, "!="));
+          break;
+        }
+        toks.push(Token(TokenType.NOT, c));
+        break;
       case "=":
+        if (peek(src, ptr.i + 1) === "=") {
+          ptr.i += 1;
+          toks.push(Token(TokenType.EQUAL, "=="));
+          break;
+        }
         toks.push(Token(TokenType.ASSIGN, c));
         break;
       case "+":
@@ -43,12 +62,12 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
       case "}":
         toks.push(Token(TokenType.RBRACE, c));
         break;
-      case "[":
-        toks.push(Token(TokenType.LBRACKET, c));
-        break;
-      case "]":
-        toks.push(Token(TokenType.RBRACKET, c));
-        break;
+      // case "[":
+      //   toks.push(Token(TokenType.LBRACKET, c));
+      //   break;
+      // case "]":
+      //   toks.push(Token(TokenType.RBRACKET, c));
+      //   break;
       case ".":
         toks.push(Token(TokenType.DOT, c));
         break;

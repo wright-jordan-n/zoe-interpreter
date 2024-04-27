@@ -9,7 +9,9 @@ import {
   MemberExpr_t,
   NodeType,
   ObjectLiteralExpr_t,
+  ReturnStmt_t,
   Stmt,
+  UnaryExpr_t,
   VarStmt_t,
 } from "./ast.ts";
 import { assignVar, initVar, lookupVar, Scope, Scope_t } from "./scope.ts";
@@ -65,19 +67,81 @@ function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
       return evalBlockStmt(node, Scope(scope));
     case NodeType.FUNCTION_LITERAL_EXPR:
       return FunctionValue(node);
-    default:
-      throw new Error(
-        `error: encountered invalid ast node with NodeType ${node.tag}`,
-      );
+    case NodeType.RETURN_STMT:
+      return evalReturnStmt(node, scope);
+    case NodeType.UNARY_EXPR:
+      return evalUnaryExpr(node, scope);
+      // default:
+      //   throw new Error(
+      //     `error: encountered invalid ast node with NodeType ${node.tag}`,
+      //   );
   }
 }
 
 // EXPRESSIONS
+function evalUnaryExpr(expr: UnaryExpr_t, scope: Scope_t): RuntimeValue {
+  const rhs = evaluate(expr.expr, scope);
+  switch (expr.operator) {
+    case "!":
+      if (rhs.tag === ValueType.BOOLEAN) {
+        rhs.value = !rhs.value;
+        return rhs;
+      }
+      throw new Error(
+        "error: unary operator '!' only allowed for boolean values",
+      );
+    case "-":
+      switch (rhs.tag) {
+        case ValueType.FLOAT: {
+          rhs.value *= -1;
+          return rhs;
+        }
+        case ValueType.INTEGER: {
+          rhs.value *= -1n;
+          return rhs;
+        }
+        default:
+          throw new Error(
+            "error: unary operator '-' only allowed for float or int values",
+          );
+      }
+    default:
+      throw new Error(
+        `error: unable to evaluate '${expr.operator}' as unary operator expression`,
+      );
+  }
+}
 
 function evalBinaryExpr(expr: BinaryExpr_t, scope: Scope_t): RuntimeValue {
   const lhs = evaluate(expr.left, scope);
   const rhs = evaluate(expr.right, scope);
   switch (expr.operator) {
+    case "==":
+      if (lhs.value === rhs.value) {
+        return BooleanValue(true);
+      }
+      return BooleanValue(false);
+    case "!=":
+      if (lhs.value !== rhs.value) {
+        return BooleanValue(true);
+      }
+      return BooleanValue(false);
+    case "<":
+      if (lhs.tag !== rhs.tag) {
+        throw new Error("error: operands for '<' must be of the same type");
+      }
+      if (lhs.tag !== ValueType.INTEGER && lhs.tag !== ValueType.FLOAT) {
+        throw new Error("error: operands for '<' must be of type int or float");
+      }
+      return BooleanValue(lhs.value < (rhs.value as number | bigint));
+    case ">":
+      if (lhs.tag !== rhs.tag) {
+        throw new Error("error: operands for '>' must be of the same type");
+      }
+      if (lhs.tag !== ValueType.INTEGER && lhs.tag !== ValueType.FLOAT) {
+        throw new Error("error: operands for '>' must be of type int or float");
+      }
+      return BooleanValue(lhs.value > (rhs.value as number | bigint));
     case "+":
       if (lhs.tag !== rhs.tag) {
         throw new Error(`error: operands for '+' must be of the same time`);
@@ -254,7 +318,15 @@ function evalCallExpr(expr: CallExpr_t, scope: Scope_t): RuntimeValue {
     for (let i = 0; i < fn.value.parameters.length; i += 1) {
       initVar(newScope, fn.value.parameters[i], args[i]);
     }
-    return evalBlockStmt(fn.value.block, newScope);
+    try {
+      evalBlockStmt(fn.value.block, newScope);
+    } catch (error) {
+      if (error instanceof Return) {
+        return error.value;
+      }
+      throw error;
+    }
+    return NullValue();
   }
   throw new Error("error: non function types are not callable");
 }
@@ -276,4 +348,17 @@ function evalBlockStmt(block: BlockStmt_t, scope: Scope_t): RuntimeValue {
     evaluate(stmt, scope);
   }
   return NullValue();
+}
+
+class Return extends Error {
+  value: RuntimeValue;
+  constructor(value: RuntimeValue) {
+    super("error: return statement only permitted within function");
+    this.value = value;
+  }
+}
+
+function evalReturnStmt(stmt: ReturnStmt_t, scope: Scope_t): RuntimeValue {
+  const value = evaluate(stmt.expr, scope);
+  throw new Return(value);
 }

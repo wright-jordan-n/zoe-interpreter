@@ -106,7 +106,11 @@ if (Deno.args.length === 0) {
     }
     console.log(stmts);
     if (!hasError) {
-      interpret(stmts, globalScope);
+      try {
+        interpret(stmts, globalScope);
+      } catch (error) {
+        console.log(error.message);
+      }
     }
   }
 } else if (Deno.args.length === 1) {
@@ -130,6 +134,10 @@ if (Deno.args.length === 0) {
     }
   }
   if (!hasError) {
-    interpret(stmts, globalScope);
+    try {
+      interpret(stmts, globalScope);
+    } catch (error) {
+      console.log(error.message);
+    }
   }
 }

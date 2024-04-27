@@ -1,5 +1,3 @@
-// import { RuntimeValue } from "./runtime.ts";
-
 export enum NodeType {
   VAR_STMT,
   RETURN_STMT,
@@ -17,6 +15,7 @@ export enum NodeType {
   MEMBER_EXPR,
   PROPERTY_EXPR,
   FUNCTION_LITERAL_EXPR,
+  UNARY_EXPR,
 }
 
 export type Stmt = VarStmt_t | ReturnStmt_t | ExprStmt_t | BlockStmt_t;
@@ -47,18 +46,10 @@ export function VarStmt(symbol: string, expr: Expr): VarStmt_t {
   };
 }
 
-interface ReturnStmt_t {
+export interface ReturnStmt_t {
   tag: NodeType.RETURN_STMT;
   expr: Expr;
 }
-
-// this should probably go in runtime.ts
-// class Return extends Error {
-//   value: RuntimeValue;
-//   constructor() {
-//     super("error: return statment only allowed in statment.")
-//   }
-// }
 
 export function ReturnStmt(expr: Expr): ReturnStmt_t {
   return {
@@ -90,7 +81,8 @@ export type Expr =
   | ObjectLiteralExpr_t
   | CallExpr_t
   | MemberExpr_t
-  | FunctionLiteralExpr_t;
+  | FunctionLiteralExpr_t
+  | UnaryExpr_t;
 
 export interface AssignmentExpr_t {
   tag: NodeType.ASSIGNMENT_EXPR;
@@ -109,6 +101,20 @@ export function AssignmentExpr(
     assignee,
     operator,
     value,
+  };
+}
+
+export interface UnaryExpr_t {
+  tag: NodeType.UNARY_EXPR;
+  operator: string;
+  expr: Expr;
+}
+
+export function UnaryExpr(operator: string, expr: Expr): UnaryExpr_t {
+  return {
+    tag: NodeType.UNARY_EXPR,
+    operator,
+    expr,
   };
 }
 

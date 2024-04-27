@@ -9,12 +9,17 @@ export enum TokenType {
   RPAREN,
   LBRACE,
   RBRACE,
-  LBRACKET,
-  RBRACKET,
+  // LBRACKET,
+  // RBRACKET,
   DOT,
   COMMA,
   COLON,
   SEMICOLON,
+  EQUAL,
+  NOT_EQUAL,
+  LESS_THAN,
+  GREATER_THAN,
+  NOT,
 
   BINARY,
   OCTAL,
@@ -27,6 +32,7 @@ export enum TokenType {
   NULL,
   VAR,
   FN,
+  RETURN,
   IDENTIFIER,
 
   EOF,
@@ -38,6 +44,7 @@ keywords.set("null", TokenType.NULL);
 keywords.set("true", TokenType.TRUE);
 keywords.set("false", TokenType.FALSE);
 keywords.set("fn", TokenType.FN);
+keywords.set("return", TokenType.RETURN);
 
 export { keywords };
 
