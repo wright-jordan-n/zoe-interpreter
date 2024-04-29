@@ -287,7 +287,6 @@ function evalAssignmentExpr(
           return value;
         }
         case NodeType.MEMBER_EXPR: {
-          console.log("member expr time!");
           const parentVal = evaluate(expr.assignee.left, scope);
           const child = expr.assignee.right;
           if (

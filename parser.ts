@@ -146,6 +146,10 @@ function parseReturnStmt(
   errs: string[],
 ): ReturnStmt_t | string {
   advance(toks, ptr);
+  if (toks[ptr.i].type === TokenType.SEMICOLON) {
+    advance(toks, ptr);
+    return ReturnStmt(NullLiteralExpr());
+  }
   const expr = parseExpr(toks, ptr, errs);
   if (typeof expr === "string") {
     return expr;

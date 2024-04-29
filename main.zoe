@@ -1,4 +1,7 @@
 var factorial = fn (n) {
+    if n < 0 {
+        return null;
+    }
     if n == 0 {
         return 1;
     }
@@ -6,3 +9,127 @@ var factorial = fn (n) {
 };
 
 print(factorial(3));
+
+var fibonacci = fn (n) {
+    if n < 0 {
+        return null;
+    }
+    if n == 0 {
+        return 0;
+    }
+    if n == 1 {
+        return 1;
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2);
+};
+
+print(fibonacci(3));
+
+var List = fn () {
+    return { head: null };
+};
+
+var append = fn (list, val) {
+    if list.head == null {
+        list.head = { val, next: null };
+        return;
+    }
+    _append(list.head, val);
+};
+
+var _append = fn (node, val) {
+    if node.next == null {
+        node.next = { val, next: null };
+        return;
+    }
+    _append(node.next, val);
+};
+
+var prepend = fn (list, val) {
+    var new_head = { val, next: list.head };
+    list.head = new_head;
+};
+
+var remove = fn (list, val) {
+    if list.head == null {
+        return;
+    }
+    if list.head.val == val {
+        list.head = null;
+        return;
+    }
+    if list.head.next == null {
+        return;
+    }
+    _remove(list.head, list.head.next, val);
+};
+
+var _remove = fn (prev, curr, val) {
+    if curr.val == val {
+        prev.next = curr.next;
+        return;
+    }
+    if curr.next == null {
+        return;
+    }
+    _remove(prev = curr, curr = curr.next, val);
+};
+
+var sum = fn (list) {
+    return _sum(list.head, 0);
+};
+
+var _sum = fn (node, total) {
+    if node == null {
+        return total;
+    }
+    return _sum(node.next, total + node.val);
+};
+
+var avg = fn (list) {
+    return _avg(list.head, 0, 0);
+};
+
+var _avg = fn (node, total, count) {
+    if node == null {
+        if count == 0 {
+            return 0;
+        }
+        return total / count;
+    }
+    return _avg(node.next, total + node.val, count + 1);
+};
+
+var max = fn (list) {
+    if list.head == null {
+        return null;
+    }
+    return _max(list.head.next, list.head.val);
+};
+
+var _max = fn (node, curr_max) {
+    if node == null {
+        return curr_max;
+    }
+    if node.val > curr_max {
+        return _max(node.next, node.val);
+    }
+    return _max(node.next, curr_max);
+};
+
+var list = List();
+
+append(list, 1);
+append(list, 2);
+append(list, 3);
+print(list);
+
+prepend(list, 0);
+print(list);
+
+remove(list, 2);
+print(list);
+
+print(sum(list));
+print(avg(list));
+print(max(list));
