@@ -1,6 +1,6 @@
 var factorial = fn (n) {
     if n < 0 {
-        return null;
+        return nil;
     }
     if n == 0 {
         return 1;
@@ -12,7 +12,7 @@ print(factorial(3));
 
 var fibonacci = fn (n) {
     if n < 0 {
-        return null;
+        return nil;
     }
     if n == 0 {
         return 0;
@@ -26,20 +26,20 @@ var fibonacci = fn (n) {
 print(fibonacci(3));
 
 var List = fn () {
-    return { head: null };
+    return { head: nil };
 };
 
 var append = fn (list, val) {
-    if list.head == null {
-        list.head = { val, next: null };
+    if list.head == nil {
+        list.head = { val, next: nil };
         return;
     }
     _append(list.head, val);
 };
 
 var _append = fn (node, val) {
-    if node.next == null {
-        node.next = { val, next: null };
+    if node.next == nil {
+        node.next = { val, next: nil };
         return;
     }
     _append(node.next, val);
@@ -51,14 +51,14 @@ var prepend = fn (list, val) {
 };
 
 var remove = fn (list, val) {
-    if list.head == null {
+    if list.head == nil {
         return;
     }
     if list.head.val == val {
-        list.head = null;
+        list.head = nil;
         return;
     }
-    if list.head.next == null {
+    if list.head.next == nil {
         return;
     }
     _remove(list.head, list.head.next, val);
@@ -69,7 +69,7 @@ var _remove = fn (prev, curr, val) {
         prev.next = curr.next;
         return;
     }
-    if curr.next == null {
+    if curr.next == nil {
         return;
     }
     _remove(prev = curr, curr = curr.next, val);
@@ -80,35 +80,35 @@ var sum = fn (list) {
 };
 
 var _sum = fn (node, total) {
-    if node == null {
+    if node == nil {
         return total;
     }
     return _sum(node.next, total + node.val);
 };
 
 var avg = fn (list) {
-    if list.head == null {
-        return null;
+    if list.head == nil {
+        return nil;
     }
     return _avg(list.head.next, list.head.val, 1);
 };
 
 var _avg = fn (node, total, count) {
-    if node == null {
+    if node == nil {
         return total / count;
     }
     return _avg(node.next, total + node.val, count + 1);
 };
 
 var max = fn (list) {
-    if list.head == null {
-        return null;
+    if list.head == nil {
+        return nil;
     }
     return _max(list.head.next, list.head.val);
 };
 
 var _max = fn (node, curr_max) {
-    if node == null {
+    if node == nil {
         return curr_max;
     }
     if node.val > curr_max {
