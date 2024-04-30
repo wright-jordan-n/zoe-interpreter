@@ -133,3 +133,14 @@ print(list);
 print(sum(list));
 print(avg(list));
 print(max(list));
+
+var make_func = fn () {
+    var x = 420;
+    return fn (y) {
+        return x + y;
+    };
+};
+
+var func = make_func();
+print(func(69));
+print(x);

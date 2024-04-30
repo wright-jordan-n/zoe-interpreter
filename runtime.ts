@@ -1,4 +1,5 @@
 import { FunctionLiteralExpr_t } from "./ast.ts";
+import { Scope_t } from "./scope.ts";
 
 export enum ValueType {
   NULL,
@@ -97,12 +98,17 @@ export function JsFnValue(
 
 interface FunctionValue_t {
   tag: ValueType.FUNCTION;
+  captured: Scope_t;
   value: FunctionLiteralExpr_t;
 }
 
-export function FunctionValue(value: FunctionLiteralExpr_t): FunctionValue_t {
+export function FunctionValue(
+  captured: Scope_t,
+  value: FunctionLiteralExpr_t,
+): FunctionValue_t {
   return {
     tag: ValueType.FUNCTION,
     value,
+    captured,
   };
 }

@@ -67,7 +67,7 @@ function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
     case NodeType.BLOCK_STMT:
       return evalBlockStmt(node, Scope(scope));
     case NodeType.FUNCTION_LITERAL_EXPR:
-      return FunctionValue(node);
+      return FunctionValue(scope, node);
     case NodeType.RETURN_STMT:
       return evalReturnStmt(node, scope);
     case NodeType.UNARY_EXPR:
@@ -330,7 +330,7 @@ function evalCallExpr(expr: CallExpr_t, scope: Scope_t): RuntimeValue {
         `error: function call expected ${fn.value.parameters.length} args, received ${args.length}`,
       );
     }
-    const newScope = Scope(scope);
+    const newScope = Scope(fn.captured);
     for (let i = 0; i < fn.value.parameters.length; i += 1) {
       initVar(newScope, fn.value.parameters[i], args[i]);
     }
