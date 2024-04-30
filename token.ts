@@ -44,7 +44,7 @@ export enum TokenType {
 
 const keywords = new Map<string, TokenType>();
 keywords.set("var", TokenType.VAR);
-keywords.set("null", TokenType.NULL);
+keywords.set("nil", TokenType.NULL);
 keywords.set("true", TokenType.TRUE);
 keywords.set("false", TokenType.FALSE);
 keywords.set("fn", TokenType.FN);
