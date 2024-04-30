@@ -87,14 +87,14 @@ var _sum = fn (node, total) {
 };
 
 var avg = fn (list) {
-    return _avg(list.head, 0, 0);
+    if list.head == null {
+        return null;
+    }
+    return _avg(list.head.next, list.head.val, 1);
 };
 
 var _avg = fn (node, total, count) {
     if node == null {
-        if count == 0 {
-            return 0;
-        }
         return total / count;
     }
     return _avg(node.next, total + node.val, count + 1);
