@@ -45,6 +45,12 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
         toks.push(Token(TokenType.MULTIPLY, c));
         break;
       case "/":
+        if (peek(src, ptr.i + 1) === "/") {
+          while (peek(src, ptr.i + 1) !== "\n") {
+            ptr.i += 1;
+          }
+          break;
+        }
         toks.push(Token(TokenType.DIVIDE, c));
         break;
       case "%":
