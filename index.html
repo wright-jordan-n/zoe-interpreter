@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zoe Programming</title>
+</head>
+
+<body>
+    <div id="container">
+        <textarea id="zoe-src" spellcheck=false></textarea>
+        <div id="console-container">
+            <button id="zoe-run">Run!</button>
+            <div id="zoe-console"></div>
+        </div>
+    </div>
+
+
+
+    <style>
+        :root {
+            font-family: "monospace";
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+            flex-direction: column;
+        }
+
+        #zoe-src {
+            width: 100%;
+            height: 70vh;
+            padding: 15px;
+            font-family: "monospace";
+            font-size: 14px;
+            background-color: #121212;
+            color: #fff;
+            border: 0;
+            outline: none;
+            resize: none;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        #zoe-run {
+            font-family: "monospace";
+            background-color: #121212;
+            color: #fff;
+            font-size: 16px;
+            border: 0;
+            top: 10px;
+            left: 15px;
+            width: 60px;
+            position: absolute;
+        }
+
+        @media (hover: none) {
+            #zoe-run:active {
+                opacity: 80%;
+                cursor: pointer;
+            }
+        }
+
+        @media (hover: hover) {
+            #zoe-run:hover {
+                opacity: 80%;
+                cursor: pointer;
+            }
+        }
+
+        #console-container {
+            height: 30vh;
+            position: relative;
+        }
+
+        #zoe-console {
+            padding: 15px;
+            padding-top: 35px;
+            background-color: #fff;
+            color: #121212;
+            height: 100%;
+            white-space: pre;
+        }
+    </style>
+    <script>
+        // document.getElementById('textbox').addEventListener('keydown', function (e) {
+        //     if (e.key == 'Tab') {
+        //         e.preventDefault();
+        //         var start = this.selectionStart;
+        //         var end = this.selectionEnd;
+
+        //         // set textarea value to: text before caret + tab + text after caret
+        //         this.value = this.value.substring(0, start) +
+        //             "\t" + this.value.substring(end);
+
+        //         // put caret at right position again
+        //         this.selectionStart =
+        //             this.selectionEnd = start + 1;
+        //     }
+        // });
+        const zoeSrc = document.querySelector("#zoe-src");
+        zoeSrc.textContent = `// Welcome to the Zoe Programming Language!
+
+// It's a pretty simple language, and its data types include: integers, float-point numbers, functions, objects, booleans, and nil.
+
+// OPERATORS AND KEYWORDS
+// Here are most of Zoe's operators: +, -, *, /, %, =, !, ==, !=, <, >.
+// Here are Zoe's keywords: var, if, else, true, false, return, nil, fn, and, or.
+// For the most part, I'll leave it to you to figure out what they do.
+
+// NUMERIC TYPES
+// Any number without a decimal portion will be considered an int, otherwise a float.
+// Numbers with a preceding 0b, 0o, or 0x will be considered as base binary, octal, or hexadecimal, respectively.
+// Arithmetic requires that numbers be of the same type.
+
+// CONTROL FLOW
+// Zoe doesn't have loops, so you'll have to get things done using recursion.
+// The only other control flow is done with if/else if/else.
+// The expression following an if must be a boolean expression.
+
+// FUNCTIONS
+// In Zoe, functions are just values, that means you'll probably want to assign an identifier, just like any other value.
+// Any function without a specified return value will return nil.
+// And as you'd expect, Zoe supports closures.
+
+// OBJECTS
+// You can express data as a collection by using an object expression.
+// Here's how: var obj = { ok: true, n: 0 };
+// And access properties with the dot operator: obj.n == 0
+
+// That's about it! Feel free to play around, and don't forget to conclude your statements with a semi-colon!
+
+// Here's some sample code to help you get started:
+
+var factorial = fn (n) {
+    if n < 0 {
+        return nil;
+    } else if n == 0 {
+        return 1;
+    } else {
+        return n * factorial(n - 1);
+    }
+};
+
+var rslt = factorial(5);
+
+print(rslt);
+`;
+        // TOKEN
+        var TokenType;
+        (function (TokenType) {
+            TokenType[TokenType["ASSIGN"] = 0] = "ASSIGN";
+            TokenType[TokenType["ADD"] = 1] = "ADD";
+            TokenType[TokenType["SUBTRACT"] = 2] = "SUBTRACT";
+            TokenType[TokenType["MULTIPLY"] = 3] = "MULTIPLY";
+            TokenType[TokenType["DIVIDE"] = 4] = "DIVIDE";
+            TokenType[TokenType["MODULO"] = 5] = "MODULO";
+            TokenType[TokenType["LPAREN"] = 6] = "LPAREN";
+            TokenType[TokenType["RPAREN"] = 7] = "RPAREN";
+            TokenType[TokenType["LBRACE"] = 8] = "LBRACE";
+            TokenType[TokenType["RBRACE"] = 9] = "RBRACE";
+            // LBRACKET,
+            // RBRACKET,
+            TokenType[TokenType["DOT"] = 10] = "DOT";
+            TokenType[TokenType["COMMA"] = 11] = "COMMA";
+            TokenType[TokenType["COLON"] = 12] = "COLON";
+            TokenType[TokenType["SEMICOLON"] = 13] = "SEMICOLON";
+            TokenType[TokenType["EQUAL"] = 14] = "EQUAL";
+            TokenType[TokenType["NOT_EQUAL"] = 15] = "NOT_EQUAL";
+            TokenType[TokenType["LESS_THAN"] = 16] = "LESS_THAN";
+            TokenType[TokenType["GREATER_THAN"] = 17] = "GREATER_THAN";
+            TokenType[TokenType["NOT"] = 18] = "NOT";
+            TokenType[TokenType["BINARY"] = 19] = "BINARY";
+            TokenType[TokenType["OCTAL"] = 20] = "OCTAL";
+            TokenType[TokenType["HEXADECIMAL"] = 21] = "HEXADECIMAL";
+            TokenType[TokenType["INTEGER"] = 22] = "INTEGER";
+            TokenType[TokenType["FLOAT"] = 23] = "FLOAT";
+            TokenType[TokenType["TRUE"] = 24] = "TRUE";
+            TokenType[TokenType["FALSE"] = 25] = "FALSE";
+            TokenType[TokenType["NULL"] = 26] = "NULL";
+            TokenType[TokenType["VAR"] = 27] = "VAR";
+            TokenType[TokenType["FN"] = 28] = "FN";
+            TokenType[TokenType["RETURN"] = 29] = "RETURN";
+            TokenType[TokenType["IDENTIFIER"] = 30] = "IDENTIFIER";
+            TokenType[TokenType["AND"] = 31] = "AND";
+            TokenType[TokenType["OR"] = 32] = "OR";
+            TokenType[TokenType["IF"] = 33] = "IF";
+            TokenType[TokenType["ELSE"] = 34] = "ELSE";
+            TokenType[TokenType["EOF"] = 35] = "EOF";
+        })(TokenType || (TokenType = {}));
+        const keywords = new Map();
+        keywords.set("var", TokenType.VAR);
+        keywords.set("nil", TokenType.NULL);
+        keywords.set("true", TokenType.TRUE);
+        keywords.set("false", TokenType.FALSE);
+        keywords.set("fn", TokenType.FN);
+        keywords.set("return", TokenType.RETURN);
+        keywords.set("and", TokenType.AND);
+        keywords.set("or", TokenType.OR);
+        keywords.set("if", TokenType.IF);
+        keywords.set("else", TokenType.ELSE);
+        function Token(type, literal) {
+            return { type, literal };
+        }
+
+        // LEXER
+        function lex(src) {
+            const toks = [];
+            const errs = [];
+            for (const ptr = { i: 0 }; ptr.i < src.length; ptr.i += 1) {
+                const c = src[ptr.i];
+                switch (c) {
+                    case " ":
+                    case "\t":
+                    case "\v":
+                    case "\f":
+                    case "\r":
+                    case "\n":
+                        break;
+                    case ">":
+                        toks.push(Token(TokenType.GREATER_THAN, c));
+                        break;
+                    case "<":
+                        toks.push(Token(TokenType.LESS_THAN, c));
+                        break;
+                    case "!":
+                        if (peek(src, ptr.i + 1) === "=") {
+                            ptr.i += 1;
+                            toks.push(Token(TokenType.NOT_EQUAL, "!="));
+                            break;
+                        }
+                        toks.push(Token(TokenType.NOT, c));
+                        break;
+                    case "=":
+                        if (peek(src, ptr.i + 1) === "=") {
+                            ptr.i += 1;
+                            toks.push(Token(TokenType.EQUAL, "=="));
+                            break;
+                        }
+                        toks.push(Token(TokenType.ASSIGN, c));
+                        break;
+                    case "+":
+                        toks.push(Token(TokenType.ADD, c));
+                        break;
+                    case "-":
+                        toks.push(Token(TokenType.SUBTRACT, c));
+                        break;
+                    case "*":
+                        toks.push(Token(TokenType.MULTIPLY, c));
+                        break;
+                    case "/":
+                        if (peek(src, ptr.i + 1) === "/") {
+                            while (peek(src, ptr.i + 1) !== "\n") {
+                                ptr.i += 1;
+                            }
+                            break;
+                        }
+                        toks.push(Token(TokenType.DIVIDE, c));
+                        break;
+                    case "%":
+                        toks.push(Token(TokenType.MODULO, c));
+                        break;
+                    case "(":
+                        toks.push(Token(TokenType.LPAREN, c));
+                        break;
+                    case ")":
+                        toks.push(Token(TokenType.RPAREN, c));
+                        break;
+                    case "{":
+                        toks.push(Token(TokenType.LBRACE, c));
+                        break;
+                    case "}":
+                        toks.push(Token(TokenType.RBRACE, c));
+                        break;
+                    // case "[":
+                    //   toks.push(Token(TokenType.LBRACKET, c));
+                    //   break;
+                    // case "]":
+                    //   toks.push(Token(TokenType.RBRACKET, c));
+                    //   break;
+                    case ".":
+                        toks.push(Token(TokenType.DOT, c));
+                        break;
+                    case ",":
+                        toks.push(Token(TokenType.COMMA, c));
+                        break;
+                    case ":":
+                        toks.push(Token(TokenType.COLON, c));
+                        break;
+                    case ";":
+                        toks.push(Token(TokenType.SEMICOLON, c));
+                        break;
+                    case "0": {
+                        const start = ptr.i;
+                        let next = peek(src, ptr.i + 1);
+                        switch (next) {
+                            case "o": {
+                                ptr.i += 1;
+                                next = peek(src, ptr.i + 1);
+                                if (!isOctal(next)) {
+                                    errs.push(`error: unexpected character '${next}', expected octal`);
+                                    break;
+                                }
+                                ptr.i += 1;
+                                for (next = peek(src, ptr.i + 1); next !== "\0" && isOctal(next); ptr.i += 1, next = peek(src, ptr.i + 1))
+                                    ;
+                                toks.push(Token(TokenType.OCTAL, src.substring(start, ptr.i + 1)));
+                                break;
+                            }
+                            case "x": {
+                                ptr.i += 1;
+                                next = peek(src, ptr.i + 1);
+                                if (!isHexadecimal(next)) {
+                                    errs.push(`error: unexpected character '${next}', expected hex`);
+                                    break;
+                                }
+                                ptr.i += 1;
+                                for (next = peek(src, ptr.i + 1); next !== "\0" && isHexadecimal(next); ptr.i += 1, next = peek(src, ptr.i + 1))
+                                    ;
+                                toks.push(Token(TokenType.HEXADECIMAL, src.substring(start, ptr.i + 1)));
+                                break;
+                            }
+                            case "b": {
+                                ptr.i += 1;
+                                next = peek(src, ptr.i + 1);
+                                if (!isBinary(next)) {
+                                    errs.push(`error: unexpected character '${next}', expected binary`);
+                                    break;
+                                }
+                                ptr.i += 1;
+                                for (next = peek(src, ptr.i + 1); next !== "\0" && isBinary(next); ptr.i += 1, next = peek(src, ptr.i + 1))
+                                    ;
+                                toks.push(Token(TokenType.BINARY, src.substring(start, ptr.i + 1)));
+                                break;
+                            }
+                            case ".": {
+                                ptr.i += 1;
+                                next = peek(src, ptr.i + 1);
+                                if (!isDigit(next)) {
+                                    errs.push(`error: unexpected character '${next}', expected digit`);
+                                    break;
+                                }
+                                ptr.i += 1;
+                                for (next = peek(src, ptr.i + 1); next !== "\0" && isDigit(next); ptr.i += 1, next = peek(src, ptr.i + 1))
+                                    ;
+                                toks.push(Token(TokenType.FLOAT, src.substring(start, ptr.i + 1)));
+                                break;
+                            }
+                            default: {
+                                for (; next !== "\0" && isDigit(next); ptr.i += 1, next = peek(src, ptr.i + 1))
+                                    ;
+                                if (next === ".") {
+                                    ptr.i += 1;
+                                    next = peek(src, ptr.i + 1);
+                                    if (!isDigit(next)) {
+                                        errs.push(`error: unexpected character '${next}', expected digit`);
+                                        break;
+                                    }
+                                    ptr.i += 1;
+                                    for (next = peek(src, ptr.i + 1); next !== "\0" && isDigit(next); ptr.i += 1, next = peek(src, ptr.i + 1))
+                                        ;
+                                    const literal = src.substring(start, ptr.i + 1);
+                                    toks.push(Token(TokenType.FLOAT, literal));
+                                    break;
+                                }
+                                const literal = src.substring(start, ptr.i + 1);
+                                toks.push(Token(TokenType.INTEGER, literal));
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        if (isAlpha(c)) {
+                            const start = ptr.i;
+                            for (let next = peek(src, ptr.i + 1); next !== "\0" && isAlphaNumeric(next); ptr.i += 1, next = peek(src, ptr.i + 1))
+                                ;
+                            const literal = src.substring(start, ptr.i + 1);
+                            const keyword = keywords.get(literal);
+                            if (keyword === undefined) {
+                                toks.push(Token(TokenType.IDENTIFIER, literal));
+                                break;
+                            }
+                            toks.push(Token(keyword, literal));
+                            break;
+                        }
+                        if (isDigit(c)) {
+                            const start = ptr.i;
+                            let next = peek(src, ptr.i + 1);
+                            for (; next !== "\0" && isDigit(next); ptr.i += 1, next = peek(src, ptr.i + 1))
+                                ;
+                            if (next === ".") {
+                                ptr.i += 1;
+                                next = peek(src, ptr.i + 1);
+                                if (!isDigit(next)) {
+                                    errs.push(`error: unexpected character '${next}', expected digit`);
+                                    break;
+                                }
+                                ptr.i += 1;
+                                for (next = peek(src, ptr.i + 1); next !== "\0" && isDigit(next); ptr.i += 1, next = peek(src, ptr.i + 1))
+                                    ;
+                                const literal = src.substring(start, ptr.i + 1);
+                                toks.push(Token(TokenType.FLOAT, literal));
+                                break;
+                            }
+                            const literal = src.substring(start, ptr.i + 1);
+                            toks.push(Token(TokenType.INTEGER, literal));
+                            break;
+                        }
+                        errs.push(`error: invalid character '${c}'`);
+                }
+            }
+            toks.push(Token(TokenType.EOF, "\0"));
+            return { toks, errs };
+        }
+        function isAlpha(c) {
+            const byte = c.charCodeAt(0);
+            return (97 <= byte && byte <= 122) || (65 <= byte && byte <= 90) ||
+                (byte === 95);
+        }
+        function isDigit(c) {
+            const byte = c.charCodeAt(0);
+            return 48 <= byte && byte <= 57;
+        }
+        function isBinary(c) {
+            return c === "0" || c === "1";
+        }
+        function isOctal(c) {
+            const byte = c.charCodeAt(0);
+            return 48 <= byte && byte <= 55;
+        }
+        function isHexadecimal(c) {
+            const byte = c.charCodeAt(0);
+            return (48 <= byte && byte <= 57) || (65 <= byte && byte <= 70) ||
+                (97 <= byte && byte <= 102);
+        }
+        function isAlphaNumeric(c) {
+            const byte = c.charCodeAt(0);
+            return (48 <= byte && byte <= 57) || (97 <= byte && byte <= 122) ||
+                (65 <= byte && byte <= 90) || (byte === 95);
+        }
+        function peek(src, n) {
+            if (n >= src.length) {
+                return "\0";
+            }
+            return src[n];
+        }
+
+        // AST
+        var NodeType;
+        (function (NodeType) {
+            NodeType[NodeType["VAR_STMT"] = 0] = "VAR_STMT";
+            NodeType[NodeType["RETURN_STMT"] = 1] = "RETURN_STMT";
+            NodeType[NodeType["EXPRESSION_STMT"] = 2] = "EXPRESSION_STMT";
+            NodeType[NodeType["BLOCK_STMT"] = 3] = "BLOCK_STMT";
+            NodeType[NodeType["IF_STMT"] = 4] = "IF_STMT";
+            NodeType[NodeType["ASSIGNMENT_EXPR"] = 5] = "ASSIGNMENT_EXPR";
+            NodeType[NodeType["BINARY_EXPR"] = 6] = "BINARY_EXPR";
+            NodeType[NodeType["IDENTIFIER_EXPR"] = 7] = "IDENTIFIER_EXPR";
+            NodeType[NodeType["INTEGER_LITERAL_EXPR"] = 8] = "INTEGER_LITERAL_EXPR";
+            NodeType[NodeType["FLOAT_LITERAL_EXPR"] = 9] = "FLOAT_LITERAL_EXPR";
+            NodeType[NodeType["NULL_LITERAL_EXPR"] = 10] = "NULL_LITERAL_EXPR";
+            NodeType[NodeType["BOOLEAN_LITERAL_EXPR"] = 11] = "BOOLEAN_LITERAL_EXPR";
+            NodeType[NodeType["OBJECT_LITERAL_EXPR"] = 12] = "OBJECT_LITERAL_EXPR";
+            NodeType[NodeType["CALL_EXPR"] = 13] = "CALL_EXPR";
+            NodeType[NodeType["MEMBER_EXPR"] = 14] = "MEMBER_EXPR";
+            NodeType[NodeType["PROPERTY_EXPR"] = 15] = "PROPERTY_EXPR";
+            NodeType[NodeType["FUNCTION_LITERAL_EXPR"] = 16] = "FUNCTION_LITERAL_EXPR";
+            NodeType[NodeType["UNARY_EXPR"] = 17] = "UNARY_EXPR";
+        })(NodeType || (NodeType = {}));
+        function IfStmt(ifs, dflt) {
+            return {
+                tag: NodeType.IF_STMT,
+                ifs,
+                dflt,
+            };
+        }
+        function BlockStmt(stmts) {
+            return {
+                tag: NodeType.BLOCK_STMT,
+                stmts,
+            };
+        }
+        function VarStmt(symbol, expr) {
+            return {
+                tag: NodeType.VAR_STMT,
+                symbol,
+                expr,
+            };
+        }
+        function ReturnStmt(expr) {
+            return {
+                tag: NodeType.RETURN_STMT,
+                expr,
+            };
+        }
+        function ExprStmt(expr) {
+            return {
+                tag: NodeType.EXPRESSION_STMT,
+                expr,
+            };
+        }
+        function AssignmentExpr(assignee, operator, value) {
+            return {
+                tag: NodeType.ASSIGNMENT_EXPR,
+                assignee,
+                operator,
+                value,
+            };
+        }
+        function UnaryExpr(operator, expr) {
+            return {
+                tag: NodeType.UNARY_EXPR,
+                operator,
+                expr,
+            };
+        }
+        function BinaryExpr(left, operator, right) {
+            return {
+                tag: NodeType.BINARY_EXPR,
+                left,
+                operator,
+                right,
+            };
+        }
+        function IdentifierExpr(symbol) {
+            return {
+                tag: NodeType.IDENTIFIER_EXPR,
+                symbol,
+            };
+        }
+        function IntegerLiteralExpr(value) {
+            return {
+                tag: NodeType.INTEGER_LITERAL_EXPR,
+                value,
+            };
+        }
+        function FloatLiteralExpr(value) {
+            return {
+                tag: NodeType.FLOAT_LITERAL_EXPR,
+                value,
+            };
+        }
+        function NullLiteralExpr() {
+            return {
+                tag: NodeType.NULL_LITERAL_EXPR,
+                value: null,
+            };
+        }
+        function BooleanLiteralExpr(value) {
+            return {
+                tag: NodeType.BOOLEAN_LITERAL_EXPR,
+                value,
+            };
+        }
+        function ObjectLiteralExpr(properties) {
+            return {
+                tag: NodeType.OBJECT_LITERAL_EXPR,
+                properties,
+            };
+        }
+        function CallExpr(caller, args) {
+            return {
+                tag: NodeType.CALL_EXPR,
+                caller,
+                args,
+            };
+        }
+        function MemberExpr(left, right) {
+            return {
+                tag: NodeType.MEMBER_EXPR,
+                left,
+                right,
+            };
+        }
+        function FunctionLiteralExpr(parameters, block) {
+            return {
+                tag: NodeType.FUNCTION_LITERAL_EXPR,
+                parameters,
+                block,
+            };
+        }
+        function PropertyExpr(symbol, value) {
+            return {
+                tag: NodeType.PROPERTY_EXPR,
+                symbol,
+                value,
+            };
+        }
+
+        // PARSER
+        // Order of Operations
+        // PrimaryExpr
+        // FuncCall ArraySubscript StructAccess
+        // UnaryExpr
+        // * / %
+        // + -
+        // < <= > >= == !=
+        // &&
+        // ||
+        // AssignmentExpr
+        function advance(toks, ptr) {
+            if (ptr.i === toks.length - 1) {
+                return;
+            }
+            ptr.i += 1;
+        }
+        // function peek(toks: Token_t[], ptr: { i: number }): Token_t | null {
+        //   if (ptr.i === toks.length - 1) {
+        //     return null;
+        //   }
+        //   return toks[ptr.i + 1];
+        // }
+        function parse(toks) {
+            const stmts = [];
+            const errs = [];
+            const ptr = { i: 0 };
+            while (toks[ptr.i].type !== TokenType.EOF) {
+                switch (toks[ptr.i].type) {
+                    case TokenType.VAR: {
+                        const rslt = parseVarStmt(toks, ptr, errs);
+                        if (typeof rslt === "string") {
+                            errs.push(rslt);
+                            break;
+                        }
+                        stmts.push(rslt);
+                        break;
+                    }
+                    case TokenType.RETURN: {
+                        const rslt = parseReturnStmt(toks, ptr, errs);
+                        if (typeof rslt === "string") {
+                            errs.push(rslt);
+                            break;
+                        }
+                        stmts.push(rslt);
+                        break;
+                    }
+                    case TokenType.LBRACE: {
+                        const rslt = parseBlockStmt(toks, ptr, errs);
+                        stmts.push(rslt);
+                        break;
+                    }
+                    case TokenType.IF: {
+                        const rslt = parseIfStmt(toks, ptr, errs);
+                        if (typeof rslt === "string") {
+                            errs.push(rslt);
+                            break;
+                        }
+                        stmts.push(rslt);
+                        break;
+                    }
+                    default: {
+                        const rslt = parseExpr(toks, ptr, errs);
+                        if (typeof rslt === "string") {
+                            errs.push(rslt);
+                        }
+                        else {
+                            if (toks[ptr.i].type !== TokenType.SEMICOLON) {
+                                errs.push(`error: unexpected token '${toks[ptr.i].literal}' expected ';'`);
+                            }
+                            else {
+                                advance(toks, ptr);
+                            }
+                            stmts.push(ExprStmt(rslt));
+                        }
+                    }
+                }
+            }
+            return { stmts, errs };
+        }
+        function parseVarStmt(toks, ptr, errs) {
+            advance(toks, ptr);
+            if (toks[ptr.i].type !== TokenType.IDENTIFIER) {
+                return `error: unexpected token '${toks[ptr.i].literal}' expected identifier`;
+            }
+            const symbol = toks[ptr.i].literal;
+            advance(toks, ptr);
+            if (toks[ptr.i].type === TokenType.SEMICOLON) {
+                advance(toks, ptr);
+                return VarStmt(symbol, NullLiteralExpr());
+            }
+            if (toks[ptr.i].type !== TokenType.ASSIGN) {
+                return `error: unexpected token '${toks[ptr.i].literal}' expected '=' or ';'`;
+            }
+            advance(toks, ptr);
+            const expr = parseExpr(toks, ptr, errs);
+            if (typeof expr === "string") {
+                return expr;
+            }
+            if (toks[ptr.i].type !== TokenType.SEMICOLON) {
+                return `error: unexpected token '${toks[ptr.i].literal}' expected ';'`;
+            }
+            advance(toks, ptr);
+            return VarStmt(symbol, expr);
+        }
+        function parseReturnStmt(toks, ptr, errs) {
+            advance(toks, ptr);
+            if (toks[ptr.i].type === TokenType.SEMICOLON) {
+                advance(toks, ptr);
+                return ReturnStmt(NullLiteralExpr());
+            }
+            const expr = parseExpr(toks, ptr, errs);
+            if (typeof expr === "string") {
+                return expr;
+            }
+            if (toks[ptr.i].type !== TokenType.SEMICOLON) {
+                return `error: unexpected token '${toks[ptr.i].literal}', expected ';'`;
+            }
+            advance(toks, ptr);
+            return ReturnStmt(expr);
+        }
+        function parseIfStmt(toks, ptr, errs) {
+            advance(toks, ptr);
+            const ifs = [];
+            let dflt = null;
+            let condition = parseExpr(toks, ptr, errs);
+            if (typeof condition === "string") {
+                return condition;
+            }
+            if (toks[ptr.i].type !== TokenType.LBRACE) {
+                return `error: unexpected token '${toks[ptr.i].literal}', expected '{'`;
+            }
+            let block = parseBlockStmt(toks, ptr, errs);
+            ifs.push({ condition, block });
+            for (; toks[ptr.i].type === TokenType.ELSE;) {
+                advance(toks, ptr);
+                if (toks[ptr.i].type === TokenType.IF) {
+                    advance(toks, ptr);
+                    condition = parseExpr(toks, ptr, errs);
+                    if (typeof condition === "string") {
+                        return condition;
+                    }
+                    if (toks[ptr.i].type !== TokenType.LBRACE) {
+                        return `error: unexpected token '${toks[ptr.i].literal}', expected '{'`;
+                    }
+                    block = parseBlockStmt(toks, ptr, errs);
+                    ifs.push({ condition, block });
+                }
+                else {
+                    if (toks[ptr.i].type !== TokenType.LBRACE) {
+                        return `error: unexpected token '${toks[ptr.i].literal}', expected '{'`;
+                    }
+                    dflt = parseBlockStmt(toks, ptr, errs);
+                    break;
+                }
+            }
+            return IfStmt(ifs, dflt);
+        }
+        function parseExpr(toks, ptr, errs) {
+            return parseAssignmentExpr(toks, ptr, errs);
+        }
+        function parsePrimaryExpr(toks, ptr, errs) {
+            const tok = toks[ptr.i];
+            switch (tok.type) {
+                // case TokenType.SUBTRACT:
+                // case TokenType.NOT:
+                //   advance(toks, ptr);
+                //   return parseUnaryExpr(toks, ptr, errs);
+                case TokenType.TRUE:
+                    advance(toks, ptr);
+                    return BooleanLiteralExpr(true);
+                case TokenType.FALSE:
+                    advance(toks, ptr);
+                    return BooleanLiteralExpr(false);
+                case TokenType.NULL:
+                    advance(toks, ptr);
+                    return NullLiteralExpr();
+                case TokenType.IDENTIFIER:
+                    advance(toks, ptr);
+                    return IdentifierExpr(tok.literal);
+                case TokenType.INTEGER:
+                case TokenType.HEXADECIMAL:
+                case TokenType.OCTAL:
+                case TokenType.BINARY:
+                    advance(toks, ptr);
+                    return IntegerLiteralExpr(BigInt(tok.literal));
+                case TokenType.FLOAT:
+                    advance(toks, ptr);
+                    return FloatLiteralExpr(Number(tok.literal));
+                case TokenType.LBRACE:
+                    // Current implementation doesn't allow arbitrary block statements.
+                    // Block statments can be done by refactoring parse function to have adjsustable stopping point?
+                    // Then a BlockStatment_t is an interface that holds an array of stmts.
+                    return parseObjectLiteralExpr(toks, ptr, errs);
+                case TokenType.LPAREN: {
+                    advance(toks, ptr);
+                    const rslt = parseExpr(toks, ptr, errs);
+                    if (typeof rslt === "string") {
+                        return rslt;
+                    }
+                    if (toks[ptr.i].type !== TokenType.RPAREN) {
+                        return `error: unexpected token '${toks[ptr.i].literal}', expected ')'`;
+                    }
+                    advance(toks, ptr);
+                    return rslt;
+                }
+                case TokenType.FN:
+                    return parseFunctionLiteralExpr(toks, ptr, errs);
+                default:
+                    advance(toks, ptr);
+                    return `error: unexpected token '${tok.literal}', expected expresssion`;
+            }
+        }
+        function parseCallMemberExpr(toks, ptr, errs) {
+            let left = parsePrimaryExpr(toks, ptr, errs);
+            if (typeof left === "string") {
+                return left;
+            }
+            for (let tok = toks[ptr.i]; tok.type === TokenType.DOT || tok.type === TokenType.LPAREN; tok = toks[ptr.i]) {
+                const operator = tok;
+                advance(toks, ptr);
+                if (operator.type === TokenType.DOT) {
+                    if (toks[ptr.i].type !== TokenType.IDENTIFIER) {
+                        return `error: unexpected token '${toks[ptr.i].literal}', expected identifier`;
+                    }
+                    const right = IdentifierExpr(toks[ptr.i].literal);
+                    advance(toks, ptr);
+                    left = MemberExpr(left, right);
+                }
+                else {
+                    const args = [];
+                    for (; ;) {
+                        if (toks[ptr.i].type === TokenType.RPAREN) {
+                            advance(toks, ptr);
+                            break;
+                        }
+                        const expr = parseExpr(toks, ptr, errs);
+                        if (typeof expr === "string") {
+                            return expr;
+                        }
+                        args.push(expr);
+                        if (toks[ptr.i].type === TokenType.COMMA) {
+                            advance(toks, ptr);
+                        }
+                    }
+                    left = CallExpr(left, args);
+                }
+            }
+            return left;
+        }
+        function parseUnaryExpr(toks, ptr, errs) {
+            if (toks[ptr.i].type !== TokenType.SUBTRACT &&
+                toks[ptr.i].type !== TokenType.NOT) {
+                return parseCallMemberExpr(toks, ptr, errs);
+            }
+            let expr;
+            do {
+                const operator = toks[ptr.i].literal;
+                advance(toks, ptr);
+                expr = parseCallMemberExpr(toks, ptr, errs);
+                if (typeof expr === "string") {
+                    return expr;
+                }
+                expr = UnaryExpr(operator, expr);
+            } while (toks[ptr.i].type === TokenType.SUBTRACT ||
+                toks[ptr.i].type === TokenType.NOT);
+            return expr;
+        }
+        function parseMultiplicativeExpr(toks, ptr, errs) {
+            let left = parseUnaryExpr(toks, ptr, errs);
+            if (typeof left === "string") {
+                return left;
+            }
+            for (let tok = toks[ptr.i]; tok.type === TokenType.MULTIPLY || tok.type === TokenType.DIVIDE ||
+                tok.type === TokenType.MODULO; tok = toks[ptr.i]) {
+                const operator = tok.literal;
+                advance(toks, ptr);
+                const right = parseUnaryExpr(toks, ptr, errs);
+                if (typeof right === "string") {
+                    return right;
+                }
+                left = BinaryExpr(left, operator, right);
+            }
+            return left;
+        }
+        function parseAdditiveExpr(toks, ptr, errs) {
+            let left = parseMultiplicativeExpr(toks, ptr, errs);
+            if (typeof left === "string") {
+                return left;
+            }
+            for (let tok = toks[ptr.i]; tok.type === TokenType.ADD || tok.type === TokenType.SUBTRACT; tok = toks[ptr.i]) {
+                const operator = tok.literal;
+                advance(toks, ptr);
+                const right = parseMultiplicativeExpr(toks, ptr, errs);
+                if (typeof right === "string") {
+                    return right;
+                }
+                left = BinaryExpr(left, operator, right);
+            }
+            return left;
+        }
+        function parseComparisonExpr(toks, ptr, errs) {
+            let left = parseAdditiveExpr(toks, ptr, errs);
+            if (typeof left === "string") {
+                return left;
+            }
+            for (let tok = toks[ptr.i]; tok.type === TokenType.EQUAL || tok.type === TokenType.NOT_EQUAL ||
+                tok.type === TokenType.LESS_THAN || tok.type === TokenType.GREATER_THAN; tok = toks[ptr.i]) {
+                const operator = tok.literal;
+                advance(toks, ptr);
+                const right = parseAdditiveExpr(toks, ptr, errs);
+                if (typeof right === "string") {
+                    return right;
+                }
+                left = BinaryExpr(left, operator, right);
+            }
+            return left;
+        }
+        function parseAndExpr(toks, ptr, errs) {
+            let left = parseComparisonExpr(toks, ptr, errs);
+            if (typeof left === "string") {
+                return left;
+            }
+            for (let tok = toks[ptr.i]; tok.type === TokenType.AND; tok = toks[ptr.i]) {
+                const operator = tok.literal;
+                advance(toks, ptr);
+                const right = parseComparisonExpr(toks, ptr, errs);
+                if (typeof right === "string") {
+                    return right;
+                }
+                left = BinaryExpr(left, operator, right);
+            }
+            return left;
+        }
+        function parseOrExpr(toks, ptr, errs) {
+            let left = parseAndExpr(toks, ptr, errs);
+            if (typeof left === "string") {
+                return left;
+            }
+            for (let tok = toks[ptr.i]; tok.type === TokenType.OR; tok = toks[ptr.i]) {
+                const operator = tok.literal;
+                advance(toks, ptr);
+                const right = parseAndExpr(toks, ptr, errs);
+                if (typeof right === "string") {
+                    return right;
+                }
+                left = BinaryExpr(left, operator, right);
+            }
+            return left;
+        }
+        function parseAssignmentExpr(toks, ptr, errs) {
+            let left = parseOrExpr(toks, ptr, errs);
+            if (typeof left === "string") {
+                return left;
+            }
+            for (let tok = toks[ptr.i]; tok.type === TokenType.ASSIGN; tok = toks[ptr.i]) {
+                const operator = tok.literal;
+                advance(toks, ptr);
+                const right = parseOrExpr(toks, ptr, errs);
+                if (typeof right === "string") {
+                    return right;
+                }
+                left = AssignmentExpr(left, operator, right);
+            }
+            return left;
+        }
+        /* This is just to parse a primary expr, it's not part of recursive descent chain.*/
+        function parseObjectLiteralExpr(toks, ptr, errs) {
+            advance(toks, ptr);
+            const properties = [];
+            for (; toks[ptr.i].type !== TokenType.EOF && toks[ptr.i].type !== TokenType.RBRACE;) {
+                if (toks[ptr.i].type !== TokenType.IDENTIFIER) {
+                    return `error: unexpected token '${toks[ptr.i].literal}' expected identifier`;
+                }
+                const key = toks[ptr.i].literal;
+                advance(toks, ptr);
+                if (toks[ptr.i].type === TokenType.COMMA) {
+                    advance(toks, ptr);
+                    properties.push(PropertyExpr(key, null));
+                    continue;
+                }
+                if (toks[ptr.i].type === TokenType.RBRACE) {
+                    properties.push(PropertyExpr(key, null));
+                    break;
+                }
+                if (toks[ptr.i].type !== TokenType.COLON) {
+                    return `error: unexpected token '${toks[ptr.i].literal}', expected ':'`;
+                }
+                advance(toks, ptr);
+                const value = parseExpr(toks, ptr, errs);
+                if (typeof value === "string") {
+                    return value;
+                }
+                properties.push(PropertyExpr(key, value));
+                if (toks[ptr.i].type === TokenType.RBRACE) {
+                    break;
+                }
+                if (toks[ptr.i].type !== TokenType.COMMA) {
+                    return `error: unexpected token '${toks[ptr.i].literal}' expected ','`;
+                }
+                advance(toks, ptr);
+                // if (toks[ptr.i].type === TokenType.COMMA) {
+                //   advance(toks, ptr);
+                // }
+            }
+            advance(toks, ptr);
+            return ObjectLiteralExpr(properties);
+        }
+        function parseFunctionLiteralExpr(toks, ptr, errs) {
+            advance(toks, ptr);
+            if (toks[ptr.i].type !== TokenType.LPAREN) {
+                return `error: unexpected token '${toks[ptr.i].literal}' expected '('`;
+            }
+            advance(toks, ptr);
+            const parameters = [];
+            for (;
+                // I only need to check rparen once before loop, bc it's also handled inside, same with obj literal expr
+                toks[ptr.i].type !== TokenType.EOF && toks[ptr.i].type !== TokenType.RPAREN;) {
+                if (toks[ptr.i].type !== TokenType.IDENTIFIER) {
+                    return `error: unexpected token '${toks[ptr.i].literal}' expected identifier`;
+                }
+                parameters.push(toks[ptr.i].literal);
+                advance(toks, ptr);
+                if (toks[ptr.i].type === TokenType.RPAREN) {
+                    break;
+                }
+                if (toks[ptr.i].type !== TokenType.COMMA) {
+                    return `error: unexpected token '${toks[ptr.i].literal}' expected ','`;
+                }
+                advance(toks, ptr);
+            }
+            if (toks[ptr.i].type !== TokenType.RPAREN) {
+                return `error: unexpected token '${toks[ptr.i].literal}' expected ')'`;
+            }
+            advance(toks, ptr);
+            if (toks[ptr.i].type !== TokenType.LBRACE) {
+                return `error: unexpected token '${toks[ptr.i].literal}' expected '{'`;
+            }
+            const block = parseBlockStmt(toks, ptr, errs);
+            return FunctionLiteralExpr(parameters, block);
+        }
+        function parseBlockStmt(toks, ptr, errs) {
+            advance(toks, ptr);
+            const stmts = [];
+            while (toks[ptr.i].type !== TokenType.EOF && toks[ptr.i].type !== TokenType.RBRACE) {
+                switch (toks[ptr.i].type) {
+                    case TokenType.VAR: {
+                        const rslt = parseVarStmt(toks, ptr, errs);
+                        if (typeof rslt === "string") {
+                            errs.push(rslt);
+                            break;
+                        }
+                        stmts.push(rslt);
+                        break;
+                    }
+                    case TokenType.RETURN: {
+                        const rslt = parseReturnStmt(toks, ptr, errs);
+                        if (typeof rslt === "string") {
+                            errs.push(rslt);
+                            break;
+                        }
+                        stmts.push(rslt);
+                        break;
+                    }
+                    case TokenType.LBRACE: {
+                        const rslt = parseBlockStmt(toks, ptr, errs);
+                        if (typeof rslt === "string") {
+                            errs.push(rslt);
+                            break;
+                        }
+                        stmts.push(rslt);
+                        break;
+                    }
+                    case TokenType.IF: {
+                        const rslt = parseIfStmt(toks, ptr, errs);
+                        if (typeof rslt === "string") {
+                            errs.push(rslt);
+                            break;
+                        }
+                        stmts.push(rslt);
+                        break;
+                    }
+                    default: {
+                        const rslt = parseExpr(toks, ptr, errs);
+                        if (typeof rslt === "string") {
+                            errs.push(rslt);
+                        }
+                        else {
+                            if (toks[ptr.i].type !== TokenType.SEMICOLON) {
+                                errs.push(`error: unexpected token '${toks[ptr.i].literal}' expected ';'`);
+                            }
+                            else {
+                                advance(toks, ptr);
+                            }
+                            stmts.push(ExprStmt(rslt));
+                        }
+                    }
+                }
+            }
+            if (toks[ptr.i].type !== TokenType.RBRACE) {
+                errs.push(`error: unexpected token '${toks[ptr.i].literal}' expected '}'`);
+                return BlockStmt(stmts);
+            }
+            advance(toks, ptr);
+            return BlockStmt(stmts);
+        }
+
+        // SCOPE
+        function Scope(parent) {
+            return {
+                parent,
+                symbols: new Map(),
+            };
+        }
+        function initVar(scope, symbol, value) {
+            if (scope.symbols.has(symbol)) {
+                throw new Error(`error: cannot redeclare variable '${symbol}'`);
+            }
+            scope.symbols.set(symbol, value);
+            return value;
+        }
+        function lookupVar(scope, symbol) {
+            const varScope = resolve(scope, symbol);
+            return varScope.symbols.get(symbol);
+        }
+        function assignVar(scope, symbol, value) {
+            const varScope = resolve(scope, symbol);
+            varScope.symbols.set(symbol, value);
+            return value;
+        }
+        function resolve(scope, symbol) {
+            if (scope.symbols.has(symbol)) {
+                return scope;
+            }
+            if (scope.parent === null) {
+                throw new Error(`unable to resolve symbol '${symbol}'`);
+            }
+            return resolve(scope.parent, symbol);
+        }
+
+        // RUNTIME
+        var ValueType;
+        (function (ValueType) {
+            ValueType[ValueType["NULL"] = 0] = "NULL";
+            ValueType[ValueType["FLOAT"] = 1] = "FLOAT";
+            ValueType[ValueType["INTEGER"] = 2] = "INTEGER";
+            ValueType[ValueType["BOOLEAN"] = 3] = "BOOLEAN";
+            ValueType[ValueType["OBJECT"] = 4] = "OBJECT";
+            ValueType[ValueType["FUNCTION"] = 5] = "FUNCTION";
+            ValueType[ValueType["JS_FN"] = 6] = "JS_FN";
+        })(ValueType || (ValueType = {}));
+        function NullValue() {
+            return {
+                tag: ValueType.NULL,
+                value: null,
+            };
+        }
+        function FloatValue(value) {
+            return {
+                tag: ValueType.FLOAT,
+                value,
+            };
+        }
+        function IntegerValue(value) {
+            return {
+                tag: ValueType.INTEGER,
+                value,
+            };
+        }
+        function BooleanValue(value) {
+            return {
+                tag: ValueType.BOOLEAN,
+                value,
+            };
+        }
+        function ObjectValue(value) {
+            return {
+                tag: ValueType.OBJECT,
+                value,
+            };
+        }
+        function JsFnValue(value) {
+            return {
+                tag: ValueType.JS_FN,
+                value,
+            };
+        }
+        function FunctionValue(captured, value) {
+            return {
+                tag: ValueType.FUNCTION,
+                value,
+                captured,
+            };
+        }
+
+        // INTERPRET
+
+        function interpret(stmts, scope) {
+            let lastEval = NullValue();
+            for (const stmt of stmts) {
+                lastEval = evaluate(stmt, scope);
+            }
+            return lastEval;
+        }
+        function evaluate(node, scope) {
+            switch (node.tag) {
+                case NodeType.VAR_STMT:
+                    return evalVarStmt(node, scope);
+                case NodeType.EXPRESSION_STMT:
+                    return evalExprStmt(node, scope);
+                case NodeType.INTEGER_LITERAL_EXPR:
+                    return IntegerValue(node.value);
+                case NodeType.FLOAT_LITERAL_EXPR:
+                    return FloatValue(node.value);
+                case NodeType.NULL_LITERAL_EXPR:
+                    return NullValue();
+                case NodeType.BOOLEAN_LITERAL_EXPR:
+                    if (node.value) {
+                        return BooleanValue(true);
+                    }
+                    return BooleanValue(false);
+                case NodeType.BINARY_EXPR:
+                    return evalBinaryExpr(node, scope);
+                case NodeType.IDENTIFIER_EXPR:
+                    return evalIdentifierExpr(node, scope);
+                case NodeType.OBJECT_LITERAL_EXPR:
+                    return evalObjectLiteralExpr(node, scope);
+                case NodeType.ASSIGNMENT_EXPR:
+                    return evalAssignmentExpr(node, scope);
+                case NodeType.MEMBER_EXPR:
+                    return evalMemberExpr(node, scope);
+                case NodeType.CALL_EXPR:
+                    return evalCallExpr(node, scope);
+                case NodeType.BLOCK_STMT:
+                    return evalBlockStmt(node, Scope(scope));
+                case NodeType.FUNCTION_LITERAL_EXPR:
+                    return FunctionValue(scope, node);
+                case NodeType.RETURN_STMT:
+                    return evalReturnStmt(node, scope);
+                case NodeType.UNARY_EXPR:
+                    return evalUnaryExpr(node, scope);
+                case NodeType.IF_STMT:
+                    return evalIfStmt(node, scope);
+                // default:
+                //   throw new Error(
+                //     `error: encountered invalid ast node with NodeType ${node.tag}`,
+                //   );
+            }
+        }
+        // EXPRESSIONS
+        function evalUnaryExpr(expr, scope) {
+            const rhs = evaluate(expr.expr, scope);
+            switch (expr.operator) {
+                case "!":
+                    if (rhs.tag === ValueType.BOOLEAN) {
+                        rhs.value = !rhs.value;
+                        return rhs;
+                    }
+                    throw new Error("error: unary operator '!' only allowed for boolean values");
+                case "-":
+                    switch (rhs.tag) {
+                        case ValueType.FLOAT: {
+                            rhs.value *= -1;
+                            return rhs;
+                        }
+                        case ValueType.INTEGER: {
+                            rhs.value *= -1n;
+                            return rhs;
+                        }
+                        default:
+                            throw new Error("error: unary operator '-' only allowed for float or int values");
+                    }
+                default:
+                    throw new Error(`error: unable to evaluate '${expr.operator}' as unary operator expression`);
+            }
+        }
+        function evalBinaryExpr(expr, scope) {
+            const lhs = evaluate(expr.left, scope);
+            const rhs = evaluate(expr.right, scope);
+            switch (expr.operator) {
+                case "and":
+                    if (lhs.tag !== ValueType.BOOLEAN || rhs.tag !== ValueType.BOOLEAN) {
+                        throw new Error("error: both sides of 'and' operator must be boolean expressions");
+                    }
+                    return BooleanValue(lhs.value && rhs.value);
+                case "or":
+                    if (lhs.tag !== ValueType.BOOLEAN || rhs.tag !== ValueType.BOOLEAN) {
+                        throw new Error("error: both sides of 'or' operator must be boolean expressions");
+                    }
+                    return BooleanValue(lhs.value || rhs.value);
+                case "==":
+                    if (lhs.value === rhs.value) {
+                        return BooleanValue(true);
+                    }
+                    return BooleanValue(false);
+                case "!=":
+                    if (lhs.value !== rhs.value) {
+                        return BooleanValue(true);
+                    }
+                    return BooleanValue(false);
+                case "<":
+                    if (lhs.tag !== rhs.tag) {
+                        throw new Error("error: operands for '<' must be of the same type");
+                    }
+                    if (lhs.tag !== ValueType.INTEGER && lhs.tag !== ValueType.FLOAT) {
+                        throw new Error("error: operands for '<' must be of type int or float");
+                    }
+                    return BooleanValue(lhs.value < rhs.value);
+                case ">":
+                    if (lhs.tag !== rhs.tag) {
+                        throw new Error("error: operands for '>' must be of the same type");
+                    }
+                    if (lhs.tag !== ValueType.INTEGER && lhs.tag !== ValueType.FLOAT) {
+                        throw new Error("error: operands for '>' must be of type int or float");
+                    }
+                    return BooleanValue(lhs.value > rhs.value);
+                case "+":
+                    if (lhs.tag !== rhs.tag) {
+                        throw new Error(`error: operands for '+' must be of the same time`);
+                    }
+                    if (lhs.tag === ValueType.INTEGER) {
+                        return IntegerValue(lhs.value + rhs.value);
+                    }
+                    if (lhs.tag === ValueType.FLOAT) {
+                        return FloatValue(lhs.value + rhs.value);
+                    }
+                    throw new Error("error: operands for '+' must be of type int or float");
+                case "-":
+                    if (lhs.tag !== rhs.tag) {
+                        throw new Error(`error: operands for '-' must be of the same time`);
+                    }
+                    if (lhs.tag === ValueType.INTEGER) {
+                        return IntegerValue(lhs.value - rhs.value);
+                    }
+                    if (lhs.tag === ValueType.FLOAT) {
+                        return FloatValue(lhs.value - rhs.value);
+                    }
+                    throw new Error("error: operands for '-' must be of type int or float");
+                case "*":
+                    if (lhs.tag !== rhs.tag) {
+                        throw new Error(`error: operands for '*' must be of the same time`);
+                    }
+                    if (lhs.tag === ValueType.INTEGER) {
+                        return IntegerValue(lhs.value * rhs.value);
+                    }
+                    if (lhs.tag === ValueType.FLOAT) {
+                        return FloatValue(lhs.value * rhs.value);
+                    }
+                    throw new Error("error: operands for '*' must be of type int or float");
+                case "/":
+                    if (lhs.tag !== rhs.tag) {
+                        throw new Error(`error: operands for '/' must be of the same time`);
+                    }
+                    if (lhs.tag === ValueType.INTEGER) {
+                        if (rhs.value === 0n) {
+                            throw new Error("error: division by zero not allowed");
+                        }
+                        return IntegerValue(lhs.value / rhs.value);
+                    }
+                    if (lhs.tag === ValueType.FLOAT) {
+                        if (rhs.value === 0) {
+                            throw new Error("error: division by zero not allowed");
+                        }
+                        return FloatValue(lhs.value / rhs.value);
+                    }
+                    throw new Error("error: operands for '/' must be of type int or float");
+                case "%":
+                    if (lhs.tag !== rhs.tag) {
+                        throw new Error(`error: operands for '%' must be of the same time`);
+                    }
+                    if (lhs.tag === ValueType.INTEGER) {
+                        return IntegerValue(lhs.value % rhs.value);
+                    }
+                    if (lhs.tag === ValueType.FLOAT) {
+                        return FloatValue(lhs.value % rhs.value);
+                    }
+                    throw new Error("error: operands for '%' must be of type int or float");
+                default:
+                    throw new Error(`error: unable to evaluate '${expr.operator}' as binary operator expression`);
+            }
+        }
+        function evalIdentifierExpr(expr, scope) {
+            return lookupVar(scope, expr.symbol);
+        }
+        function evalObjectLiteralExpr(expr, scope) {
+            const m = {};
+            for (const { symbol, value } of expr.properties) {
+                if (value === null) {
+                    m[symbol] = lookupVar(scope, symbol);
+                }
+                else {
+                    m[symbol] = evaluate(value, scope);
+                }
+            }
+            return ObjectValue(m);
+        }
+        function evalMemberExpr(expr, scope) {
+            const parentVal = evaluate(expr.left, scope);
+            const child = expr.right;
+            if (parentVal.tag !== ValueType.OBJECT) {
+                throw new Error("error: dot operator can only be called on type object");
+            }
+            if (child.tag !== NodeType.IDENTIFIER_EXPR) {
+                throw new Error("error: right hand side of dot operator must be an identifier");
+            }
+            const childVal = parentVal.value[child.symbol];
+            if (childVal === undefined) {
+                throw new Error(`error: field ${child.symbol} is not present on calling object`);
+            }
+            return childVal;
+        }
+        // I might want to swap these switches.
+        function evalAssignmentExpr(expr, scope) {
+            switch (expr.operator) {
+                case "=":
+                    switch (expr.assignee.tag) {
+                        case NodeType.IDENTIFIER_EXPR: {
+                            const value = evaluate(expr.value, scope);
+                            assignVar(scope, expr.assignee.symbol, value);
+                            return value;
+                        }
+                        case NodeType.MEMBER_EXPR: {
+                            const parentVal = evaluate(expr.assignee.left, scope);
+                            const child = expr.assignee.right;
+                            if (parentVal.tag !== ValueType.OBJECT) {
+                                throw new Error("error: dot operator can only be called on type object");
+                            }
+                            if (child.tag !== NodeType.IDENTIFIER_EXPR) {
+                                throw new Error("error: right hand side of dot operator must be an identifier");
+                            }
+                            const value = evaluate(expr.value, scope);
+                            parentVal.value[child.symbol] = value;
+                            return value;
+                        }
+                        default:
+                            throw new Error("error: assignee must be an identifier or object property");
+                    }
+                default:
+                    throw new Error(`error: unable to evaluate '${expr.operator}' as assignment expression`);
+            }
+        }
+        function evalCallExpr(expr, scope) {
+            const args = expr.args.map(function (expr) {
+                return evaluate(expr, scope);
+            });
+            const fn = evaluate(expr.caller, scope);
+            if (fn.tag === ValueType.JS_FN) {
+                return fn.value(args);
+            }
+            else if (fn.tag === ValueType.FUNCTION) {
+                if (args.length !== fn.value.parameters.length) {
+                    throw new Error(`error: function call expected ${fn.value.parameters.length} args, received ${args.length}`);
+                }
+                const newScope = Scope(fn.captured);
+                for (let i = 0; i < fn.value.parameters.length; i += 1) {
+                    initVar(newScope, fn.value.parameters[i], args[i]);
+                }
+                try {
+                    evalBlockStmt(fn.value.block, newScope);
+                }
+                catch (error) {
+                    if (error instanceof Return) {
+                        return error.value;
+                    }
+                    throw error;
+                }
+                return NullValue();
+            }
+            throw new Error("error: non function types are not callable");
+        }
+        // STATEMENTS
+        function evalVarStmt(stmt, scope) {
+            initVar(scope, stmt.symbol, evaluate(stmt.expr, scope));
+            return NullValue();
+        }
+        function evalExprStmt(stmt, scope) {
+            evaluate(stmt.expr, scope);
+            return NullValue();
+        }
+        function evalBlockStmt(block, scope) {
+            for (const stmt of block.stmts) {
+                evaluate(stmt, scope);
+            }
+            return NullValue();
+        }
+        class Return extends Error {
+            constructor(value) {
+                super("error: return statement only permitted within function");
+                this.value = value;
+            }
+        }
+        function evalReturnStmt(stmt, scope) {
+            const value = evaluate(stmt.expr, scope);
+            throw new Return(value);
+        }
+        function evalIfStmt(stmt, scope) {
+            for (const sect of stmt.ifs) {
+                const rv = evaluate(sect.condition, scope);
+                if (rv.tag !== ValueType.BOOLEAN) {
+                    throw new Error("error: if condition must be a boolean expression");
+                }
+                if (rv.value === true) {
+                    evalBlockStmt(sect.block, Scope(scope));
+                    return NullValue();
+                }
+            }
+            if (stmt.dflt !== null) {
+                evalBlockStmt(stmt.dflt, Scope(scope));
+            }
+            return NullValue();
+        }
+
+        // MAIN
+
+        function stringifyZoeValue(rv) {
+            switch (rv.tag) {
+                case ValueType.NULL:
+                    return "nil";
+                case ValueType.FLOAT: {
+                    let str = rv.value.toString();
+                    if (!str.includes(".")) {
+                        str = str.concat(".0");
+                    }
+                    return str;
+                }
+                case ValueType.INTEGER:
+                    return rv.value.toString();
+                case ValueType.BOOLEAN:
+                    return rv.value.toString();
+                case ValueType.OBJECT:
+                    return stringifyZoeObject(rv);
+                case ValueType.JS_FN:
+                    return "[JavaScript Function]";
+                case ValueType.FUNCTION:
+                    return `[Zoe Function]`;
+            }
+        }
+        function stringifyZoeObject(rv) {
+            const entries = Object.entries(rv.value);
+            if (entries.length === 0) {
+                return "{}";
+            }
+            const arr = [];
+            arr.push("{ ");
+            for (let i = 0; i < entries.length - 1; i += 1) {
+                if (entries[i][1].tag !== ValueType.OBJECT) {
+                    arr.push(`${entries[i][0]}: ${stringifyZoeValue(entries[i][1])}, `);
+                }
+                else {
+                    arr.push(`${entries[i][0]}: ${stringifyZoeObject(entries[i][1])}, `);
+                }
+            }
+            if (entries[entries.length - 1][1].tag !== ValueType.OBJECT) {
+                arr.push(`${entries[entries.length - 1][0]}: ${stringifyZoeValue(entries[entries.length - 1][1])} }`);
+            }
+            else {
+                arr.push(`${entries[entries.length - 1][0]}: ${stringifyZoeObject(entries[entries.length - 1][1])} }`);
+            }
+            return arr.join("");
+        }
+        function print(rv_arr) {
+            if (rv_arr.length !== 1) {
+                throw new Error("error: print function expects one argument.");
+            }
+            const zoe_console = document.querySelector("#zoe-console");
+            zoe_console.textContent += stringifyZoeValue(rv_arr[0]) + "\r\n";
+            return NullValue();
+        }
+
+        function execute(src) {
+            const globalScope = Scope(null);
+            initVar(globalScope, "print", JsFnValue(print));
+            // deno-lint-ignore prefer-const
+            let toks, stmts, lexErrs, parseErrs;
+            let hasError = false;
+            ({ toks, errs: lexErrs } = lex(src));
+            // console.log(toks);
+            const errs = [];
+            if (lexErrs.length !== 0) {
+                hasError = true;
+                for (const err of lexErrs) {
+                    errs.push(err);
+                }
+            }
+            ({ stmts, errs: parseErrs } = parse(toks));
+            // console.log(stmts);
+            if (parseErrs.length !== 0) {
+                hasError = true;
+                for (const err of parseErrs) {
+                    errs.push(err);
+                }
+            }
+            if (!hasError) {
+                try {
+                    interpret(stmts, globalScope);
+                }
+                catch (error) {
+                    const zoe_console = document.querySelector("#zoe-console");
+                    zoe_console.textContent = error.message;
+                }
+            } else {
+                const zoe_console = document.querySelector("#zoe-console");
+                zoe_console.textContent = errs.join("\n");
+            }
+        }
+        const btn = document.querySelector("#zoe-run");
+        btn.addEventListener("click", function () {
+            const zoe_console = document.querySelector("#zoe-console");
+            zoe_console.textContent = "";
+            const src = document.querySelector("#zoe-src").value;
+            execute(src);
+        });
+    </script>
+</body>
+
+</html>
