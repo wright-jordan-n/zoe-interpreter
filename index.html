@@ -43,7 +43,7 @@
             height: 70vh;
             padding: 15px;
             font-family: "monospace";
-            font-size: 14px;
+            font-size: 11px;
             background-color: #121212;
             color: #fff;
             border: 0;
@@ -59,7 +59,7 @@
             font-family: "monospace";
             background-color: #121212;
             color: #fff;
-            font-size: 16px;
+            font-size: 11px;
             border: 0;
             top: 10px;
             left: 15px;
@@ -1136,7 +1136,7 @@ print(rslt);
                 return scope;
             }
             if (scope.parent === null) {
-                throw new Error(`unable to resolve symbol '${symbol}'`);
+                throw new Error(`error: unable to resolve symbol '${symbol}'`);
             }
             return resolve(scope.parent, symbol);
         }
