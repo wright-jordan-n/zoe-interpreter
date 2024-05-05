@@ -96,7 +96,7 @@ function panic(rv_arr: RuntimeValue[]): RuntimeValue {
 const string_utils = ObjectValue({
   at: JsFnValue(function (rv_arr: RuntimeValue[]): RuntimeValue {
     if (rv_arr.length !== 2) {
-      throw new Error("error: char_at function expects two arguments");
+      throw new Error("error: strings.at function expects two arguments");
     }
     const str = rv_arr[0];
     const index = rv_arr[1];

@@ -83,6 +83,12 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
         let eofErr = false;
         while (peek(src, ptr.i + 1) !== '"' && ptr.i < src.length) {
           if (isWhiteSpace(peek(src, ptr.i + 1))) {
+            if (peek(src, ptr.i + 1) === "\n") {
+              stringLexErr = true;
+              eofErr = true;
+              errs.push("error: unterminated string literal");
+              break;
+            }
             ptr.i += 1;
             literal.push(" ");
           } else if (peek(src, ptr.i + 1) === "\\") {
