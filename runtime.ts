@@ -8,6 +8,7 @@ export enum ValueType {
   BOOLEAN,
   OBJECT,
   FUNCTION,
+  STRING,
   JS_FN,
 }
 
@@ -18,7 +19,8 @@ export type RuntimeValue =
   | BooleanValue_t
   | ObjectValue_t
   | JsFnValue_t
-  | FunctionValue_t;
+  | FunctionValue_t
+  | StringValue_t;
 
 interface NullValue_t {
   tag: ValueType.NULL;
@@ -29,6 +31,18 @@ export function NullValue(): NullValue_t {
   return {
     tag: ValueType.NULL,
     value: null,
+  };
+}
+
+interface StringValue_t {
+  tag: ValueType.STRING;
+  value: string;
+}
+
+export function StringValue(value: string): StringValue_t {
+  return {
+    tag: ValueType.STRING,
+    value,
   };
 }
 

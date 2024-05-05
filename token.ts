@@ -26,6 +26,7 @@ export enum TokenType {
   HEXADECIMAL,
   INTEGER,
   FLOAT,
+  STRING,
 
   TRUE,
   FALSE,

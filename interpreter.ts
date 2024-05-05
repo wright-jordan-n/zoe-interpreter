@@ -24,6 +24,7 @@ import {
   NullValue,
   ObjectValue,
   RuntimeValue,
+  StringValue,
   ValueType,
 } from "./runtime.ts";
 
@@ -74,6 +75,8 @@ function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
       return evalUnaryExpr(node, scope);
     case NodeType.IF_STMT:
       return evalIfStmt(node, scope);
+    case NodeType.STRING_LITERAL_EXPR:
+      return StringValue(node.value);
       // default:
       //   throw new Error(
       //     `error: encountered invalid ast node with NodeType ${node.tag}`,
@@ -169,7 +172,12 @@ function evalBinaryExpr(expr: BinaryExpr_t, scope: Scope_t): RuntimeValue {
       if (lhs.tag === ValueType.FLOAT) {
         return FloatValue(lhs.value + (rhs.value as number));
       }
-      throw new Error("error: operands for '+' must be of type int or float");
+      if (lhs.tag === ValueType.STRING) {
+        return StringValue(lhs.value + (rhs.value as string));
+      }
+      throw new Error(
+        "error: operands for '+' must be of type int, float, or string",
+      );
     case "-":
       if (lhs.tag !== rhs.tag) {
         throw new Error(`error: operands for '-' must be of the same time`);

@@ -7,8 +7,10 @@ import { initVar, Scope } from "./scope.ts";
 import {
   JsFnValue,
   NullValue,
+  ObjectValue,
   ObjectValue_t,
   RuntimeValue,
+  StringValue,
   ValueType,
 } from "./runtime.ts";
 
@@ -33,6 +35,8 @@ function stringifyZoeValue(rv: RuntimeValue): string {
       return "[JavaScript Function]";
     case ValueType.FUNCTION:
       return `[Zoe Function]`;
+    case ValueType.STRING:
+      return rv.value;
   }
 }
 
@@ -71,12 +75,44 @@ function stringifyZoeObject(rv: ObjectValue_t): string {
 }
 
 function print(rv_arr: RuntimeValue[]): RuntimeValue {
-  if (rv_arr.length === 0) {
-    throw new Error("error: print function expects one argument.");
+  if (rv_arr.length !== 1) {
+    throw new Error("error: print function expects one argument");
   }
   console.log(stringifyZoeValue(rv_arr[0]));
   return NullValue();
 }
+
+function panic(rv_arr: RuntimeValue[]): RuntimeValue {
+  if (rv_arr.length !== 1) {
+    throw new Error("error: panic function expects one argument");
+  }
+  const val = rv_arr[0];
+  if (val.tag !== ValueType.STRING) {
+    throw new Error("error: panic function expects a string");
+  }
+  throw new Error(`error: ${val.value}`);
+}
+
+const string_utils = ObjectValue({
+  at: JsFnValue(function (rv_arr: RuntimeValue[]): RuntimeValue {
+    if (rv_arr.length !== 2) {
+      throw new Error("error: char_at function expects two arguments");
+    }
+    const str = rv_arr[0];
+    const index = rv_arr[1];
+    if (str.tag !== ValueType.STRING || index.tag !== ValueType.INTEGER) {
+      throw new Error(
+        "error: strings.at function expects the following arguments: (str: string, n: int)",
+      );
+    }
+    if (index.value >= BigInt(str.value.length)) {
+      throw new Error(
+        "error: strings.at refuses to index outside of string range",
+      );
+    }
+    return StringValue(str.value.charAt(Number(index.value)));
+  }),
+});
 
 const globalScope = Scope(null);
 initVar(
@@ -84,6 +120,12 @@ initVar(
   "print",
   JsFnValue(print),
 );
+initVar(
+  globalScope,
+  "panic",
+  JsFnValue(panic),
+);
+initVar(globalScope, "strings", string_utils);
 
 if (Deno.args.length === 0) {
   let toks: Token_t[], stmts: Stmt[], lexErrs: string[], parseErrs: string[];

@@ -21,6 +21,7 @@ import {
   ReturnStmt,
   ReturnStmt_t,
   Stmt,
+  StringLiteralExpr,
   UnaryExpr,
   VarStmt,
   VarStmt_t,
@@ -117,7 +118,9 @@ function parseVarStmt(
 ): VarStmt_t | string {
   advance(toks, ptr);
   if (toks[ptr.i].type !== TokenType.IDENTIFIER) {
-    return `unexpected token '${toks[ptr.i].literal}' expected identifier`;
+    return `error: unexpected token '${
+      toks[ptr.i].literal
+    }' expected identifier`;
   }
   const symbol = toks[ptr.i].literal;
   advance(toks, ptr);
@@ -126,7 +129,9 @@ function parseVarStmt(
     return VarStmt(symbol, NullLiteralExpr());
   }
   if (toks[ptr.i].type !== TokenType.ASSIGN) {
-    return `unexpected token '${toks[ptr.i].literal}' expected '=' or ';'`;
+    return `error: unexpected token '${
+      toks[ptr.i].literal
+    }' expected '=' or ';'`;
   }
   advance(toks, ptr);
   const expr = parseExpr(toks, ptr, errs);
@@ -134,7 +139,7 @@ function parseVarStmt(
     return expr;
   }
   if (toks[ptr.i].type !== TokenType.SEMICOLON) {
-    return `unexpected token '${toks[ptr.i].literal}' expected ';'`;
+    return `error: unexpected token '${toks[ptr.i].literal}' expected ';'`;
   }
   advance(toks, ptr);
   return VarStmt(symbol, expr);
@@ -155,7 +160,7 @@ function parseReturnStmt(
     return expr;
   }
   if (toks[ptr.i].type !== TokenType.SEMICOLON) {
-    return `unexpected token '${toks[ptr.i].literal}', expected ';'`;
+    return `error: unexpected token '${toks[ptr.i].literal}', expected ';'`;
   }
   advance(toks, ptr);
   return ReturnStmt(expr);
@@ -242,6 +247,9 @@ function parsePrimaryExpr(
     case TokenType.FLOAT:
       advance(toks, ptr);
       return FloatLiteralExpr(Number(tok.literal));
+    case TokenType.STRING:
+      advance(toks, ptr);
+      return StringLiteralExpr(tok.literal);
     case TokenType.LBRACE:
       // Current implementation doesn't allow arbitrary block statements.
       // Block statments can be done by refactoring parse function to have adjsustable stopping point?

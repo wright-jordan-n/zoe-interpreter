@@ -12,6 +12,7 @@ export enum NodeType {
   NULL_LITERAL_EXPR,
   BOOLEAN_LITERAL_EXPR,
   OBJECT_LITERAL_EXPR,
+  STRING_LITERAL_EXPR,
   CALL_EXPR,
   MEMBER_EXPR,
   PROPERTY_EXPR,
@@ -105,7 +106,8 @@ export type Expr =
   | CallExpr_t
   | MemberExpr_t
   | FunctionLiteralExpr_t
-  | UnaryExpr_t;
+  | UnaryExpr_t
+  | StringLiteralExpr_t;
 
 export interface AssignmentExpr_t {
   tag: NodeType.ASSIGNMENT_EXPR;
@@ -170,6 +172,18 @@ export function IdentifierExpr(symbol: string): IdentifierExpr_t {
   return {
     tag: NodeType.IDENTIFIER_EXPR,
     symbol,
+  };
+}
+
+interface StringLiteralExpr_t {
+  tag: NodeType.STRING_LITERAL_EXPR;
+  value: string;
+}
+
+export function StringLiteralExpr(value: string): StringLiteralExpr_t {
+  return {
+    tag: NodeType.STRING_LITERAL_EXPR,
+    value,
   };
 }
 

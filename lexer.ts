@@ -46,7 +46,7 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
         break;
       case "/":
         if (peek(src, ptr.i + 1) === "/") {
-          while (peek(src, ptr.i + 1) !== "\n") {
+          while (peek(src, ptr.i + 1) !== "\n" && ptr.i < src.length) {
             ptr.i += 1;
           }
           break;
@@ -77,6 +77,59 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
       case ".":
         toks.push(Token(TokenType.DOT, c));
         break;
+      case '"': {
+        const literal: string[] = [];
+        let stringLexErr = false;
+        let eofErr = false;
+        while (peek(src, ptr.i + 1) !== '"' && ptr.i < src.length) {
+          if (isWhiteSpace(peek(src, ptr.i + 1))) {
+            ptr.i += 1;
+            literal.push(" ");
+          } else if (peek(src, ptr.i + 1) === "\\") {
+            ptr.i += 1;
+            if (peek(src, ptr.i + 1) === "\0") {
+              stringLexErr = true;
+              eofErr = true;
+              errs.push("error: unterminated string literal");
+              break;
+            }
+            switch (peek(src, ptr.i + 1)) {
+              case "n":
+                ptr.i += 1;
+                literal.push("\n");
+                break;
+              case "t":
+                ptr.i += 1;
+                literal.push("\t");
+                break;
+              case "\\":
+                ptr.i += 1;
+                literal.push("\\");
+                break;
+              default:
+                ptr.i += 1;
+                stringLexErr = true;
+                errs.push(`error: invalid escape token '${src[ptr.i]}'`);
+            }
+          } else {
+            literal.push(peek(src, ptr.i + 1));
+            ptr.i += 1;
+          }
+          if (stringLexErr) {
+            break;
+          }
+        }
+        if (peek(src, ptr.i + 1) !== '"' && !eofErr) {
+          errs.push(`error: unterminated string literal`);
+          break;
+        }
+        if (stringLexErr) {
+          break;
+        }
+        ptr.i += 1;
+        toks.push(Token(TokenType.STRING, literal.join("")));
+        break;
+      }
       case ",":
         toks.push(Token(TokenType.COMMA, c));
         break;
@@ -292,4 +345,18 @@ function peek(src: string, n: number): string {
     return "\0";
   }
   return src[n];
+}
+
+function isWhiteSpace(c: string) {
+  switch (c) {
+    case " ":
+    case "\t":
+    case "\v":
+    case "\f":
+    case "\r":
+    case "\n":
+      return true;
+    default:
+      return false;
+  }
 }

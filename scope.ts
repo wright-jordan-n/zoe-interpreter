@@ -47,7 +47,7 @@ function resolve(scope: Scope_t, symbol: string): Scope_t {
     return scope;
   }
   if (scope.parent === null) {
-    throw new Error(`unable to resolve symbol '${symbol}'`);
+    throw new Error(`error: unable to resolve symbol '${symbol}'`);
   }
   return resolve(scope.parent, symbol);
 }
