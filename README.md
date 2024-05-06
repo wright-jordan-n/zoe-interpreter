@@ -40,7 +40,7 @@ A value surrounded by double quotes will be treated as a string. A subscript
 expression can you used to access the individual bytes of a string.
 
 ```
-// The string "hello world"
+// The string "Hello, World!"
 "Hello, World!"
 
 // The integer value of the character "e"
