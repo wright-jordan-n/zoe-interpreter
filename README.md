@@ -153,10 +153,18 @@ print_until(10); // Prints numbers 1-9 in order.
 
 ## Arithmetic
 
-Arithmetic operators include: `+`, `-`, `*`, `/`, `%`. The default order of operations can be overrided with parentheses.
+Arithmetic operators include: `+`, `-`, `*`, `/`, `%`. The default order of operations can be overrided with parentheses. Arithmetic requires that operands be of the same type. That is, both integers or both floats.
 
 ```
 print((5 + 2) * 3); // Prints 21
 
 print(5 + 2 * 3); // Prints 11
+```
+
+## String Concatentaion
+
+The `+` operator can also be used to concatenate strings.
+
+```
+print("Hello, " + "World!"); // Prints "Hello, World!"
 ```
