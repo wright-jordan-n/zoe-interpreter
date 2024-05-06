@@ -16,6 +16,7 @@
         <textarea id="zoe-src" spellcheck=false></textarea>
         <div id="console-container">
             <button id="zoe-run">Run!</button>
+            <button id="zoe-clear">Clear!</button>
             <div id="zoe-console"></div>
         </div>
     </div>
@@ -48,8 +49,8 @@
             padding: 15px;
             font-family: "Space Mono";
             font-size: 14px;
-            background-color: #fff;
-            color: #121212;
+            background-color: #161e29;
+            color: #bfc7d2;
             border: 0;
             outline: none;
             resize: none;
@@ -57,25 +58,43 @@
 
         #zoe-run {
             font-family: "Space Mono";
-            background-color: #fff;
-            color: #121212;
+            font-weight: 600;
+            background-color: #161e29;
+            color: #17B877;
             font-size: 14px;
-            border: 0;
+            border: 2px solid #17B877;
             top: 10px;
             left: 15px;
             width: 60px;
             position: absolute;
         }
 
+        #zoe-clear {
+            font-family: "Space Mono";
+            font-weight: 600;
+            background-color: #161e29;
+            color: #FFC26E;
+            font-size: 14px;
+            border: 2px solid #FFC26E;
+            top: 10px;
+            left: 85px;
+            width: 65px;
+            position: absolute;
+        }
+
         @media (hover: none) {
-            #zoe-run:active {
+
+            #zoe-run:active,
+            #zoe-clear:active {
                 opacity: 80%;
                 cursor: pointer;
             }
         }
 
         @media (hover: hover) {
-            #zoe-run:hover {
+
+            #zoe-run:hover,
+            #zoe-clear:hover {
                 opacity: 80%;
                 cursor: pointer;
             }
@@ -85,13 +104,14 @@
             height: 30%;
             width: 100%;
             position: relative;
+            border-top: 2px solid #25A6E9;
         }
 
         #zoe-console {
             padding: 15px;
             padding-top: 35px;
-            background-color: #121212;
-            color: #fff;
+            background-color: #161e29;
+            color: #bfc7d2;
             height: 100%;
             white-space: pre;
         }
@@ -1681,6 +1701,12 @@ print_n(1);
             zoe_console.textContent = "";
             const src = document.querySelector("#zoe-src").value;
             execute(src);
+        });
+
+        const clear_btn = document.querySelector("#zoe-clear");
+        clear_btn.addEventListener("click", function () {
+            const zoe_console = document.querySelector("#zoe-console");
+            zoe_console.textContent = "";
         });
     </script>
 </body>
