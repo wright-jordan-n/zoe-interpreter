@@ -76,8 +76,8 @@ return `nil`.
 
 ## Variables
 
-You can assign variables with the `var` keyword. The statement must be concluded
-with a semicolon.
+You can initialize variables with the `var` keyword. The statement must be
+concluded with a semicolon.
 
 ```
 var i = 42;
