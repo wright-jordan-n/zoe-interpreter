@@ -5,12 +5,12 @@ import { Token_t } from "./token.ts";
 import { interpret } from "./interpreter.ts";
 import { initVar, Scope } from "./scope.ts";
 import {
+  IntegerValue,
   JsFnValue,
   NullValue,
   ObjectValue,
   ObjectValue_t,
   RuntimeValue,
-  StringValue,
   ValueType,
 } from "./runtime.ts";
 
@@ -36,7 +36,7 @@ function stringifyZoeValue(rv: RuntimeValue): string {
     case ValueType.FUNCTION:
       return `[Zoe Function]`;
     case ValueType.STRING:
-      return rv.value;
+      return new TextDecoder().decode(rv.value);
   }
 }
 
@@ -93,24 +93,18 @@ function panic(rv_arr: RuntimeValue[]): RuntimeValue {
   throw new Error(`error: ${val.value}`);
 }
 
-const string_utils = ObjectValue({
-  at: JsFnValue(function (rv_arr: RuntimeValue[]): RuntimeValue {
-    if (rv_arr.length !== 2) {
-      throw new Error("error: strings.at function expects two arguments");
+const strings = ObjectValue({
+  len: JsFnValue(function (rv_arr: RuntimeValue[]): RuntimeValue {
+    if (rv_arr.length !== 1) {
+      throw new Error("error: strings.len function expects one argument");
     }
     const str = rv_arr[0];
-    const index = rv_arr[1];
-    if (str.tag !== ValueType.STRING || index.tag !== ValueType.INTEGER) {
+    if (str.tag !== ValueType.STRING) {
       throw new Error(
-        "error: strings.at function expects the following arguments: (str: string, n: int)",
+        "error: strings.len function expects a string",
       );
     }
-    if (index.value >= BigInt(str.value.length)) {
-      throw new Error(
-        "error: strings.at refuses to index outside of string range",
-      );
-    }
-    return StringValue(str.value.charAt(Number(index.value)));
+    return IntegerValue(BigInt(str.value.length));
   }),
 });
 
@@ -125,7 +119,7 @@ initVar(
   "panic",
   JsFnValue(panic),
 );
-initVar(globalScope, "strings", string_utils);
+initVar(globalScope, "strings", strings);
 
 if (Deno.args.length === 0) {
   let toks: Token_t[], stmts: Stmt[], lexErrs: string[], parseErrs: string[];

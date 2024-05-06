@@ -36,10 +36,10 @@ export function NullValue(): NullValue_t {
 
 interface StringValue_t {
   tag: ValueType.STRING;
-  value: string;
+  value: Uint8Array;
 }
 
-export function StringValue(value: string): StringValue_t {
+export function StringValue(value: Uint8Array): StringValue_t {
   return {
     tag: ValueType.STRING,
     value,

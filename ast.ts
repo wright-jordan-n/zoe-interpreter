@@ -18,6 +18,7 @@ export enum NodeType {
   PROPERTY_EXPR,
   FUNCTION_LITERAL_EXPR,
   UNARY_EXPR,
+  SUBSCRIPT_EXPR,
 }
 
 export type Stmt =
@@ -105,9 +106,24 @@ export type Expr =
   | ObjectLiteralExpr_t
   | CallExpr_t
   | MemberExpr_t
+  | SubscriptExpr_t
   | FunctionLiteralExpr_t
   | UnaryExpr_t
   | StringLiteralExpr_t;
+
+export interface SubscriptExpr_t {
+  tag: NodeType.SUBSCRIPT_EXPR;
+  left: Expr;
+  right: Expr;
+}
+
+export function SubscriptExpr(left: Expr, right: Expr): SubscriptExpr_t {
+  return {
+    tag: NodeType.SUBSCRIPT_EXPR,
+    left,
+    right,
+  };
+}
 
 export interface AssignmentExpr_t {
   tag: NodeType.ASSIGNMENT_EXPR;
@@ -177,10 +193,10 @@ export function IdentifierExpr(symbol: string): IdentifierExpr_t {
 
 interface StringLiteralExpr_t {
   tag: NodeType.STRING_LITERAL_EXPR;
-  value: string;
+  value: Uint8Array;
 }
 
-export function StringLiteralExpr(value: string): StringLiteralExpr_t {
+export function StringLiteralExpr(value: Uint8Array): StringLiteralExpr_t {
   return {
     tag: NodeType.STRING_LITERAL_EXPR,
     value,

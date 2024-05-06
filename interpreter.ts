@@ -12,6 +12,7 @@ import {
   ObjectLiteralExpr_t,
   ReturnStmt_t,
   Stmt,
+  SubscriptExpr_t,
   UnaryExpr_t,
   VarStmt_t,
 } from "./ast.ts";
@@ -77,6 +78,8 @@ function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
       return evalIfStmt(node, scope);
     case NodeType.STRING_LITERAL_EXPR:
       return StringValue(node.value);
+    case NodeType.SUBSCRIPT_EXPR:
+      return evalSubscriptExpr(node, scope);
       // default:
       //   throw new Error(
       //     `error: encountered invalid ast node with NodeType ${node.tag}`,
@@ -85,6 +88,25 @@ function evaluate(node: Stmt | Expr, scope: Scope_t): RuntimeValue {
 }
 
 // EXPRESSIONS
+function evalSubscriptExpr(
+  expr: SubscriptExpr_t,
+  scope: Scope_t,
+): RuntimeValue {
+  const lhs = evaluate(expr.left, scope);
+  const rhs = evaluate(expr.right, scope);
+
+  if (lhs.tag !== ValueType.STRING) {
+    throw new Error("error: lhs of subscript expresssion must be a string");
+  }
+  if (rhs.tag !== ValueType.INTEGER) {
+    throw new Error("error: subscript expression expects integer argument");
+  }
+  if (rhs.value >= lhs.value.length) {
+    throw new Error("error: attempting to index outside of string range");
+  }
+  return IntegerValue(BigInt(lhs.value[Number(rhs.value)]));
+}
+
 function evalUnaryExpr(expr: UnaryExpr_t, scope: Scope_t): RuntimeValue {
   const rhs = evaluate(expr.expr, scope);
   switch (expr.operator) {
@@ -173,7 +195,17 @@ function evalBinaryExpr(expr: BinaryExpr_t, scope: Scope_t): RuntimeValue {
         return FloatValue(lhs.value + (rhs.value as number));
       }
       if (lhs.tag === ValueType.STRING) {
-        return StringValue(lhs.value + (rhs.value as string));
+        const u8Array = new Uint8Array(
+          lhs.value.length + (rhs.value as Uint8Array).length,
+        );
+        let i = 0;
+        for (; i < lhs.value.length; i += 1) {
+          u8Array[i] = lhs.value[i];
+        }
+        for (; i < u8Array.length; i += 1) {
+          u8Array[i] = (rhs.value as Uint8Array)[i];
+        }
+        return StringValue(u8Array);
       }
       throw new Error(
         "error: operands for '+' must be of type int, float, or string",

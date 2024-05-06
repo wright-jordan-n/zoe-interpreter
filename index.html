@@ -4,6 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
     <title>Zoe Programming Language</title>
 </head>
 
@@ -20,7 +24,7 @@
 
     <style>
         :root {
-            font-family: "monospace";
+            font-family: "Space Mono";
         }
 
         *,
@@ -40,9 +44,9 @@
 
         #zoe-src {
             width: 100%;
-            height: 70vh;
+            height: 70%;
             padding: 15px;
-            font-family: "monospace";
+            font-family: "Space Mono";
             font-size: 14px;
             background-color: #fff;
             color: #121212;
@@ -52,7 +56,7 @@
         }
 
         #zoe-run {
-            font-family: "monospace";
+            font-family: "Space Mono";
             background-color: #fff;
             color: #121212;
             font-size: 14px;
@@ -78,7 +82,8 @@
         }
 
         #console-container {
-            height: 30vh;
+            height: 30%;
+            width: 100%;
             position: relative;
         }
 
@@ -92,70 +97,16 @@
         }
     </style>
     <script>
-        // document.getElementById('textbox').addEventListener('keydown', function (e) {
-        //     if (e.key == 'Tab') {
-        //         e.preventDefault();
-        //         var start = this.selectionStart;
-        //         var end = this.selectionEnd;
-
-        //         // set textarea value to: text before caret + tab + text after caret
-        //         this.value = this.value.substring(0, start) +
-        //             "\t" + this.value.substring(end);
-
-        //         // put caret at right position again
-        //         this.selectionStart =
-        //             this.selectionEnd = start + 1;
-        //     }
-        // });
         const zoeSrc = document.querySelector("#zoe-src");
-        zoeSrc.textContent = `// Welcome to the Zoe Programming Language!
-
-// It's a pretty simple language, and its data types include: integers, floating-point numbers, functions, objects, booleans, and nil.
-
-// OPERATORS AND KEYWORDS
-// Here are most of Zoe's operators: +, -, *, /, %, =, !, ==, !=, <, >.
-// Here are Zoe's keywords: var, if, else, true, false, return, nil, fn, and, or.
-// For the most part, I'll leave it to you to figure out what they do.
-
-// NUMBERS
-// Any number without a decimal portion will be considered an int, otherwise a float.
-// Numbers with a preceding 0b, 0o, or 0x will be considered as base binary, octal, or hexadecimal, respectively.
-// Arithmetic requires that numbers be of the same type.
-
-// CONTROL FLOW
-// Zoe doesn't have loops, so you'll have to get things done using recursion.
-// The only other control flow is done with if/else if/else.
-// The expression following an if must be a boolean expression.
-
-// FUNCTIONS
-// In Zoe, functions are just values, that means you'll probably want to assign an identifier, just like any other value.
-// Any function without a specified return value will return nil.
-// And as you'd expect, Zoe supports closures.
-
-// OBJECTS
-// You can express data as a collection by using an object expression.
-// Here's how: var obj = { ok: true, n: 0 };
-// And access properties with the dot operator: obj.n == 0
-
-// That's about it! Feel free to play around, and don't forget to conclude your statements with a semi-colon!
-
-// Here's some sample code to help you get started:
-
-var factorial = fn (n) {
-    if n < 0 {
+        zoeSrc.textContent = `var print_n = fn (n) {
+    if n < 0 or n == 0 {
         return nil;
-    } else if n == 0 {
-        return 1;
-    } else {
-        return n * factorial(n - 1);
     }
+    print("hello world");
+    print_n(n - 1);
 };
 
-var rslt = factorial(5);
-
-print(rslt);
-`;
-        // TOKEN
+print_n(1);`;
         var TokenType;
         (function (TokenType) {
             TokenType[TokenType["ASSIGN"] = 0] = "ASSIGN";
@@ -168,34 +119,35 @@ print(rslt);
             TokenType[TokenType["RPAREN"] = 7] = "RPAREN";
             TokenType[TokenType["LBRACE"] = 8] = "LBRACE";
             TokenType[TokenType["RBRACE"] = 9] = "RBRACE";
-            // LBRACKET,
-            // RBRACKET,
-            TokenType[TokenType["DOT"] = 10] = "DOT";
-            TokenType[TokenType["COMMA"] = 11] = "COMMA";
-            TokenType[TokenType["COLON"] = 12] = "COLON";
-            TokenType[TokenType["SEMICOLON"] = 13] = "SEMICOLON";
-            TokenType[TokenType["EQUAL"] = 14] = "EQUAL";
-            TokenType[TokenType["NOT_EQUAL"] = 15] = "NOT_EQUAL";
-            TokenType[TokenType["LESS_THAN"] = 16] = "LESS_THAN";
-            TokenType[TokenType["GREATER_THAN"] = 17] = "GREATER_THAN";
-            TokenType[TokenType["NOT"] = 18] = "NOT";
-            TokenType[TokenType["BINARY"] = 19] = "BINARY";
-            TokenType[TokenType["OCTAL"] = 20] = "OCTAL";
-            TokenType[TokenType["HEXADECIMAL"] = 21] = "HEXADECIMAL";
-            TokenType[TokenType["INTEGER"] = 22] = "INTEGER";
-            TokenType[TokenType["FLOAT"] = 23] = "FLOAT";
-            TokenType[TokenType["TRUE"] = 24] = "TRUE";
-            TokenType[TokenType["FALSE"] = 25] = "FALSE";
-            TokenType[TokenType["NULL"] = 26] = "NULL";
-            TokenType[TokenType["VAR"] = 27] = "VAR";
-            TokenType[TokenType["FN"] = 28] = "FN";
-            TokenType[TokenType["RETURN"] = 29] = "RETURN";
-            TokenType[TokenType["IDENTIFIER"] = 30] = "IDENTIFIER";
-            TokenType[TokenType["AND"] = 31] = "AND";
-            TokenType[TokenType["OR"] = 32] = "OR";
-            TokenType[TokenType["IF"] = 33] = "IF";
-            TokenType[TokenType["ELSE"] = 34] = "ELSE";
-            TokenType[TokenType["EOF"] = 35] = "EOF";
+            TokenType[TokenType["LBRACKET"] = 10] = "LBRACKET";
+            TokenType[TokenType["RBRACKET"] = 11] = "RBRACKET";
+            TokenType[TokenType["DOT"] = 12] = "DOT";
+            TokenType[TokenType["COMMA"] = 13] = "COMMA";
+            TokenType[TokenType["COLON"] = 14] = "COLON";
+            TokenType[TokenType["SEMICOLON"] = 15] = "SEMICOLON";
+            TokenType[TokenType["EQUAL"] = 16] = "EQUAL";
+            TokenType[TokenType["NOT_EQUAL"] = 17] = "NOT_EQUAL";
+            TokenType[TokenType["LESS_THAN"] = 18] = "LESS_THAN";
+            TokenType[TokenType["GREATER_THAN"] = 19] = "GREATER_THAN";
+            TokenType[TokenType["NOT"] = 20] = "NOT";
+            TokenType[TokenType["BINARY"] = 21] = "BINARY";
+            TokenType[TokenType["OCTAL"] = 22] = "OCTAL";
+            TokenType[TokenType["HEXADECIMAL"] = 23] = "HEXADECIMAL";
+            TokenType[TokenType["INTEGER"] = 24] = "INTEGER";
+            TokenType[TokenType["FLOAT"] = 25] = "FLOAT";
+            TokenType[TokenType["STRING"] = 26] = "STRING";
+            TokenType[TokenType["TRUE"] = 27] = "TRUE";
+            TokenType[TokenType["FALSE"] = 28] = "FALSE";
+            TokenType[TokenType["NULL"] = 29] = "NULL";
+            TokenType[TokenType["VAR"] = 30] = "VAR";
+            TokenType[TokenType["FN"] = 31] = "FN";
+            TokenType[TokenType["RETURN"] = 32] = "RETURN";
+            TokenType[TokenType["IDENTIFIER"] = 33] = "IDENTIFIER";
+            TokenType[TokenType["AND"] = 34] = "AND";
+            TokenType[TokenType["OR"] = 35] = "OR";
+            TokenType[TokenType["IF"] = 36] = "IF";
+            TokenType[TokenType["ELSE"] = 37] = "ELSE";
+            TokenType[TokenType["EOF"] = 38] = "EOF";
         })(TokenType || (TokenType = {}));
         const keywords = new Map();
         keywords.set("var", TokenType.VAR);
@@ -211,8 +163,6 @@ print(rslt);
         function Token(type, literal) {
             return { type, literal };
         }
-
-        // LEXER
         function lex(src) {
             const toks = [];
             const errs = [];
@@ -259,7 +209,7 @@ print(rslt);
                         break;
                     case "/":
                         if (peek(src, ptr.i + 1) === "/") {
-                            while (peek(src, ptr.i + 1) !== "\n") {
+                            while (peek(src, ptr.i + 1) !== "\n" && ptr.i < src.length) {
                                 ptr.i += 1;
                             }
                             break;
@@ -281,15 +231,76 @@ print(rslt);
                     case "}":
                         toks.push(Token(TokenType.RBRACE, c));
                         break;
-                    // case "[":
-                    //   toks.push(Token(TokenType.LBRACKET, c));
-                    //   break;
-                    // case "]":
-                    //   toks.push(Token(TokenType.RBRACKET, c));
-                    //   break;
+                    case "[":
+                        toks.push(Token(TokenType.LBRACKET, c));
+                        break;
+                    case "]":
+                        toks.push(Token(TokenType.RBRACKET, c));
+                        break;
                     case ".":
                         toks.push(Token(TokenType.DOT, c));
                         break;
+                    case '"': {
+                        const literal = [];
+                        let stringLexErr = false;
+                        let eofErr = false;
+                        while (peek(src, ptr.i + 1) !== '"' && ptr.i < src.length) {
+                            if (isWhiteSpace(peek(src, ptr.i + 1))) {
+                                if (peek(src, ptr.i + 1) === "\n") {
+                                    stringLexErr = true;
+                                    eofErr = true;
+                                    errs.push("error: unterminated string literal");
+                                    break;
+                                }
+                                ptr.i += 1;
+                                literal.push(" ");
+                            }
+                            else if (peek(src, ptr.i + 1) === "\\") {
+                                ptr.i += 1;
+                                if (peek(src, ptr.i + 1) === "\0") {
+                                    stringLexErr = true;
+                                    eofErr = true;
+                                    errs.push("error: unterminated string literal");
+                                    break;
+                                }
+                                switch (peek(src, ptr.i + 1)) {
+                                    case "n":
+                                        ptr.i += 1;
+                                        literal.push("\n");
+                                        break;
+                                    case "t":
+                                        ptr.i += 1;
+                                        literal.push("\t");
+                                        break;
+                                    case "\\":
+                                        ptr.i += 1;
+                                        literal.push("\\");
+                                        break;
+                                    default:
+                                        ptr.i += 1;
+                                        stringLexErr = true;
+                                        errs.push(`error: invalid escape token '${src[ptr.i]}'`);
+                                }
+                            }
+                            else {
+                                literal.push(peek(src, ptr.i + 1));
+                                ptr.i += 1;
+                            }
+                            if (stringLexErr) {
+                                break;
+                            }
+                        }
+                        if (peek(src, ptr.i + 1) !== '"' && !eofErr) {
+                            errs.push(`error: unterminated string literal`);
+                            break;
+                        }
+                        if (stringLexErr) {
+                            break;
+                        }
+                        ptr.i += 1;
+                        toks.push(Token(TokenType.STRING, literal.join("")));
+                        break;
+                    }
                     case ",":
                         toks.push(Token(TokenType.COMMA, c));
                         break;
@@ -454,8 +465,19 @@ print(rslt);
             }
             return src[n];
         }
-
-        // AST
+        function isWhiteSpace(c) {
+            switch (c) {
+                case " ":
+                case "\t":
+                case "\v":
+                case "\f":
+                case "\r":
+                case "\n":
+                    return true;
+                default:
+                    return false;
+            }
+        }
         var NodeType;
         (function (NodeType) {
             NodeType[NodeType["VAR_STMT"] = 0] = "VAR_STMT";
@@ -471,11 +493,13 @@ print(rslt);
             NodeType[NodeType["NULL_LITERAL_EXPR"] = 10] = "NULL_LITERAL_EXPR";
             NodeType[NodeType["BOOLEAN_LITERAL_EXPR"] = 11] = "BOOLEAN_LITERAL_EXPR";
             NodeType[NodeType["OBJECT_LITERAL_EXPR"] = 12] = "OBJECT_LITERAL_EXPR";
-            NodeType[NodeType["CALL_EXPR"] = 13] = "CALL_EXPR";
-            NodeType[NodeType["MEMBER_EXPR"] = 14] = "MEMBER_EXPR";
-            NodeType[NodeType["PROPERTY_EXPR"] = 15] = "PROPERTY_EXPR";
-            NodeType[NodeType["FUNCTION_LITERAL_EXPR"] = 16] = "FUNCTION_LITERAL_EXPR";
-            NodeType[NodeType["UNARY_EXPR"] = 17] = "UNARY_EXPR";
+            NodeType[NodeType["STRING_LITERAL_EXPR"] = 13] = "STRING_LITERAL_EXPR";
+            NodeType[NodeType["CALL_EXPR"] = 14] = "CALL_EXPR";
+            NodeType[NodeType["MEMBER_EXPR"] = 15] = "MEMBER_EXPR";
+            NodeType[NodeType["PROPERTY_EXPR"] = 16] = "PROPERTY_EXPR";
+            NodeType[NodeType["FUNCTION_LITERAL_EXPR"] = 17] = "FUNCTION_LITERAL_EXPR";
+            NodeType[NodeType["UNARY_EXPR"] = 18] = "UNARY_EXPR";
+            NodeType[NodeType["SUBSCRIPT_EXPR"] = 19] = "SUBSCRIPT_EXPR";
         })(NodeType || (NodeType = {}));
         function IfStmt(ifs, dflt) {
             return {
@@ -509,6 +533,13 @@ print(rslt);
                 expr,
             };
         }
+        function SubscriptExpr(left, right) {
+            return {
+                tag: NodeType.SUBSCRIPT_EXPR,
+                left,
+                right,
+            };
+        }
         function AssignmentExpr(assignee, operator, value) {
             return {
                 tag: NodeType.ASSIGNMENT_EXPR,
@@ -536,6 +567,12 @@ print(rslt);
             return {
                 tag: NodeType.IDENTIFIER_EXPR,
                 symbol,
+            };
+        }
+        function StringLiteralExpr(value) {
+            return {
+                tag: NodeType.STRING_LITERAL_EXPR,
+                value,
             };
         }
         function IntegerLiteralExpr(value) {
@@ -596,30 +633,12 @@ print(rslt);
                 value,
             };
         }
-
-        // PARSER
-        // Order of Operations
-        // PrimaryExpr
-        // FuncCall ArraySubscript StructAccess
-        // UnaryExpr
-        // * / %
-        // + -
-        // < <= > >= == !=
-        // &&
-        // ||
-        // AssignmentExpr
         function advance(toks, ptr) {
             if (ptr.i === toks.length - 1) {
                 return;
             }
             ptr.i += 1;
         }
-        // function peek(toks: Token_t[], ptr: { i: number }): Token_t | null {
-        //   if (ptr.i === toks.length - 1) {
-        //     return null;
-        //   }
-        //   return toks[ptr.i + 1];
-        // }
         function parse(toks) {
             const stmts = [];
             const errs = [];
@@ -761,10 +780,6 @@ print(rslt);
         function parsePrimaryExpr(toks, ptr, errs) {
             const tok = toks[ptr.i];
             switch (tok.type) {
-                // case TokenType.SUBTRACT:
-                // case TokenType.NOT:
-                //   advance(toks, ptr);
-                //   return parseUnaryExpr(toks, ptr, errs);
                 case TokenType.TRUE:
                     advance(toks, ptr);
                     return BooleanLiteralExpr(true);
@@ -786,10 +801,10 @@ print(rslt);
                 case TokenType.FLOAT:
                     advance(toks, ptr);
                     return FloatLiteralExpr(Number(tok.literal));
+                case TokenType.STRING:
+                    advance(toks, ptr);
+                    return StringLiteralExpr(new TextEncoder().encode(tok.literal));
                 case TokenType.LBRACE:
-                    // Current implementation doesn't allow arbitrary block statements.
-                    // Block statments can be done by refactoring parse function to have adjsustable stopping point?
-                    // Then a BlockStatment_t is an interface that holds an array of stmts.
                     return parseObjectLiteralExpr(toks, ptr, errs);
                 case TokenType.LPAREN: {
                     advance(toks, ptr);
@@ -815,7 +830,8 @@ print(rslt);
             if (typeof left === "string") {
                 return left;
             }
-            for (let tok = toks[ptr.i]; tok.type === TokenType.DOT || tok.type === TokenType.LPAREN; tok = toks[ptr.i]) {
+            for (let tok = toks[ptr.i]; tok.type === TokenType.DOT || tok.type === TokenType.LPAREN ||
+                tok.type === TokenType.LBRACKET; tok = toks[ptr.i]) {
                 const operator = tok;
                 advance(toks, ptr);
                 if (operator.type === TokenType.DOT) {
@@ -825,6 +841,17 @@ print(rslt);
                     const right = IdentifierExpr(toks[ptr.i].literal);
                     advance(toks, ptr);
                     left = MemberExpr(left, right);
+                }
+                else if (operator.type === TokenType.LBRACKET) {
+                    const right = parseExpr(toks, ptr, errs);
+                    if (typeof right === "string") {
+                        return right;
+                    }
+                    if (toks[ptr.i].type !== TokenType.RBRACKET) {
+                        return `error: unexpected token ${toks[ptr.i].literal}, expected ']'`;
+                    }
+                    advance(toks, ptr);
+                    left = SubscriptExpr(left, right);
                 }
                 else {
                     const args = [];
@@ -963,7 +990,6 @@ print(rslt);
             }
             return left;
         }
-        /* This is just to parse a primary expr, it's not part of recursive descent chain.*/
         function parseObjectLiteralExpr(toks, ptr, errs) {
             advance(toks, ptr);
             const properties = [];
@@ -998,9 +1024,6 @@ print(rslt);
                     return `error: unexpected token '${toks[ptr.i].literal}' expected ','`;
                 }
                 advance(toks, ptr);
-                // if (toks[ptr.i].type === TokenType.COMMA) {
-                //   advance(toks, ptr);
-                // }
             }
             advance(toks, ptr);
             return ObjectLiteralExpr(properties);
@@ -1012,9 +1035,7 @@ print(rslt);
             }
             advance(toks, ptr);
             const parameters = [];
-            for (;
-                // I only need to check rparen once before loop, bc it's also handled inside, same with obj literal expr
-                toks[ptr.i].type !== TokenType.EOF && toks[ptr.i].type !== TokenType.RPAREN;) {
+            for (; toks[ptr.i].type !== TokenType.EOF && toks[ptr.i].type !== TokenType.RPAREN;) {
                 if (toks[ptr.i].type !== TokenType.IDENTIFIER) {
                     return `error: unexpected token '${toks[ptr.i].literal}' expected identifier`;
                 }
@@ -1103,8 +1124,6 @@ print(rslt);
             advance(toks, ptr);
             return BlockStmt(stmts);
         }
-
-        // SCOPE
         function Scope(parent) {
             return {
                 parent,
@@ -1136,8 +1155,6 @@ print(rslt);
             }
             return resolve(scope.parent, symbol);
         }
-
-        // RUNTIME
         var ValueType;
         (function (ValueType) {
             ValueType[ValueType["NULL"] = 0] = "NULL";
@@ -1146,12 +1163,19 @@ print(rslt);
             ValueType[ValueType["BOOLEAN"] = 3] = "BOOLEAN";
             ValueType[ValueType["OBJECT"] = 4] = "OBJECT";
             ValueType[ValueType["FUNCTION"] = 5] = "FUNCTION";
-            ValueType[ValueType["JS_FN"] = 6] = "JS_FN";
+            ValueType[ValueType["STRING"] = 6] = "STRING";
+            ValueType[ValueType["JS_FN"] = 7] = "JS_FN";
         })(ValueType || (ValueType = {}));
         function NullValue() {
             return {
                 tag: ValueType.NULL,
                 value: null,
+            };
+        }
+        function StringValue(value) {
+            return {
+                tag: ValueType.STRING,
+                value,
             };
         }
         function FloatValue(value) {
@@ -1191,9 +1215,6 @@ print(rslt);
                 captured,
             };
         }
-
-        // INTERPRET
-
         function interpret(stmts, scope) {
             let lastEval = NullValue();
             for (const stmt of stmts) {
@@ -1240,13 +1261,26 @@ print(rslt);
                     return evalUnaryExpr(node, scope);
                 case NodeType.IF_STMT:
                     return evalIfStmt(node, scope);
-                // default:
-                //   throw new Error(
-                //     `error: encountered invalid ast node with NodeType ${node.tag}`,
-                //   );
+                case NodeType.STRING_LITERAL_EXPR:
+                    return StringValue(node.value);
+                case NodeType.SUBSCRIPT_EXPR:
+                    return evalSubscriptExpr(node, scope);
             }
         }
-        // EXPRESSIONS
+        function evalSubscriptExpr(expr, scope) {
+            const lhs = evaluate(expr.left, scope);
+            const rhs = evaluate(expr.right, scope);
+            if (lhs.tag !== ValueType.STRING) {
+                throw new Error("error: lhs of subscript expresssion must be a string");
+            }
+            if (rhs.tag !== ValueType.INTEGER) {
+                throw new Error("error: subscript expression expects integer argument");
+            }
+            if (rhs.value >= lhs.value.length) {
+                throw new Error("error: attempting to index outside of string range");
+            }
+            return IntegerValue(BigInt(lhs.value[Number(rhs.value)]));
+        }
         function evalUnaryExpr(expr, scope) {
             const rhs = evaluate(expr.expr, scope);
             switch (expr.operator) {
@@ -1323,7 +1357,18 @@ print(rslt);
                     if (lhs.tag === ValueType.FLOAT) {
                         return FloatValue(lhs.value + rhs.value);
                     }
-                    throw new Error("error: operands for '+' must be of type int or float");
+                    if (lhs.tag === ValueType.STRING) {
+                        const u8Array = new Uint8Array(lhs.value.length + rhs.value.length);
+                        let i = 0;
+                        for (; i < lhs.value.length; i += 1) {
+                            u8Array[i] = lhs.value[i];
+                        }
+                        for (; i < u8Array.length; i += 1) {
+                            u8Array[i] = rhs.value[i];
+                        }
+                        return StringValue(u8Array);
+                    }
+                    throw new Error("error: operands for '+' must be of type int, float, or string");
                 case "-":
                     if (lhs.tag !== rhs.tag) {
                         throw new Error(`error: operands for '-' must be of the same time`);
@@ -1408,7 +1453,6 @@ print(rslt);
             }
             return childVal;
         }
-        // I might want to swap these switches.
         function evalAssignmentExpr(expr, scope) {
             switch (expr.operator) {
                 case "=":
@@ -1467,7 +1511,6 @@ print(rslt);
             }
             throw new Error("error: non function types are not callable");
         }
-        // STATEMENTS
         function evalVarStmt(stmt, scope) {
             initVar(scope, stmt.symbol, evaluate(stmt.expr, scope));
             return NullValue();
@@ -1508,13 +1551,10 @@ print(rslt);
             }
             return NullValue();
         }
-
-        // MAIN
-
         function stringifyZoeValue(rv) {
             switch (rv.tag) {
                 case ValueType.NULL:
-                    return "nil";
+                    return "null";
                 case ValueType.FLOAT: {
                     let str = rv.value.toString();
                     if (!str.includes(".")) {
@@ -1532,6 +1572,8 @@ print(rslt);
                     return "[JavaScript Function]";
                 case ValueType.FUNCTION:
                     return `[Zoe Function]`;
+                case ValueType.STRING:
+                    return new TextDecoder().decode(rv.value);
             }
         }
         function stringifyZoeObject(rv) {
@@ -1565,10 +1607,34 @@ print(rslt);
             zoe_console.textContent += stringifyZoeValue(rv_arr[0]) + "\r\n";
             return NullValue();
         }
+        function panic(rv_arr) {
+            if (rv_arr.length !== 1) {
+                throw new Error("error: panic function expects one argument");
+            }
+            const val = rv_arr[0];
+            if (val.tag !== ValueType.STRING) {
+                throw new Error("error: panic function expects a string");
+            }
+            throw new Error(`error: ${val.value}`);
+        }
+        const strings = ObjectValue({
+            len: JsFnValue(function (rv_arr) {
+                if (rv_arr.length !== 1) {
+                    throw new Error("error: strings.len function expects one argument");
+                }
+                const str = rv_arr[0];
+                if (str.tag !== ValueType.STRING) {
+                    throw new Error("error: strings.len function expects a string");
+                }
+                return IntegerValue(BigInt(str.value.length));
+            }),
+        });
 
         function execute(src) {
             const globalScope = Scope(null);
             initVar(globalScope, "print", JsFnValue(print));
+            initVar(globalScope, "panic", JsFnValue(panic));
+            initVar(globalScope, "strings", strings);
             // deno-lint-ignore prefer-const
             let toks, stmts, lexErrs, parseErrs;
             let hasError = false;
@@ -1602,6 +1668,9 @@ print(rslt);
                 zoe_console.textContent = errs.join("\n");
             }
         }
+
+        document.querySelector("#zoe-src").focus();
+        document.querySelector("#zoe-src").selectionStart = document.querySelector("#zoe-src").textContent.length;
         const btn = document.querySelector("#zoe-run");
         btn.addEventListener("click", function () {
             const zoe_console = document.querySelector("#zoe-console");

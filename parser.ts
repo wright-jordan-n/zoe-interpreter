@@ -22,6 +22,7 @@ import {
   ReturnStmt_t,
   Stmt,
   StringLiteralExpr,
+  SubscriptExpr,
   UnaryExpr,
   VarStmt,
   VarStmt_t,
@@ -249,7 +250,7 @@ function parsePrimaryExpr(
       return FloatLiteralExpr(Number(tok.literal));
     case TokenType.STRING:
       advance(toks, ptr);
-      return StringLiteralExpr(tok.literal);
+      return StringLiteralExpr(new TextEncoder().encode(tok.literal));
     case TokenType.LBRACE:
       // Current implementation doesn't allow arbitrary block statements.
       // Block statments can be done by refactoring parse function to have adjsustable stopping point?
@@ -286,7 +287,8 @@ function parseCallMemberExpr(
   }
   for (
     let tok = toks[ptr.i];
-    tok.type === TokenType.DOT || tok.type === TokenType.LPAREN;
+    tok.type === TokenType.DOT || tok.type === TokenType.LPAREN ||
+    tok.type === TokenType.LBRACKET;
     tok = toks[ptr.i]
   ) {
     const operator = tok;
@@ -300,6 +302,16 @@ function parseCallMemberExpr(
       const right = IdentifierExpr(toks[ptr.i].literal);
       advance(toks, ptr);
       left = MemberExpr(left, right);
+    } else if (operator.type === TokenType.LBRACKET) {
+      const right = parseExpr(toks, ptr, errs);
+      if (typeof right === "string") {
+        return right;
+      }
+      if (toks[ptr.i].type !== TokenType.RBRACKET) {
+        return `error: unexpected token ${toks[ptr.i].literal}, expected ']'`;
+      }
+      advance(toks, ptr);
+      left = SubscriptExpr(left, right);
     } else {
       const args: Expr[] = [];
       for (;;) {
