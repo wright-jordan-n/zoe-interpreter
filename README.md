@@ -161,7 +161,7 @@ print((5 + 2) * 3); // Prints 21
 print(5 + 2 * 3); // Prints 11
 ```
 
-## String Concatentaion
+## String Concatenation
 
 The `+` operator can also be used to concatenate strings.
 
