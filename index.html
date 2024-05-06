@@ -118,15 +118,11 @@
         const zoeSrc = document.querySelector("#zoe-src");
         zoeSrc.textContent = `// Welcome to The Zoe Programming Language!
 
-var print_n = fn (n) {
-    if n < 0 or n == 0 {
-        return nil;
-    }
+var say_hi = fn () {
     print("Hello, World!");
-    print_n(n - 1);
 };
 
-print_n(1);
+say_hi();
 
 // Documentation: https://github.com/wright-jordan-n/zoe`;
         var TokenType;
