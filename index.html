@@ -49,8 +49,8 @@
             padding: 15px;
             font-family: "Space Mono";
             font-size: 14px;
-            background-color: #161e29;
-            color: #bfc7d2;
+            background-color: #0D1321;
+            color: #F3E0EC;
             border: 0;
             outline: none;
             resize: none;
@@ -59,51 +59,41 @@
         #zoe-run {
             font-family: "Space Mono";
             font-weight: 600;
-            background-color: #161e29;
-            color: #17B877;
+            background-color: #0D1321;
+            color: #06D6A0;
             font-size: 14px;
-            border: 2px solid #17B877;
-            top: 10px;
+            border: 2px solid #06D6A0;
+            top: -11px;
             left: 15px;
             width: 60px;
+            margin-right: 2px;
             position: absolute;
         }
 
         #decor-line {
-            background-color: #FFC26E;
+            background-color: #F1A208;
             top: 2px;
             width: 100%;
             height: 2px;
             position: absolute;
         }
 
-        #zoe-clear {
-            font-family: "Space Mono";
-            font-weight: 600;
-            background-color: #161e29;
-            color: #FFC26E;
-            font-size: 14px;
-            border: 2px solid #FFC26E;
-            top: 10px;
-            left: 85px;
-            width: 65px;
-            position: absolute;
-        }
-
         @media (hover: none) {
 
-            #zoe-run:active,
-            #zoe-clear:active {
-                opacity: 80%;
+            #zoe-run:active {
+                background-color: #06D6A0;
+                color: #0D1321;
+                border-color: #0D1321;
                 cursor: pointer;
             }
         }
 
         @media (hover: hover) {
 
-            #zoe-run:hover,
-            #zoe-clear:hover {
-                opacity: 80%;
+            #zoe-run:hover {
+                background-color: #06D6A0;
+                color: #0D1321;
+                border-color: #0D1321;
                 cursor: pointer;
             }
         }
@@ -112,14 +102,14 @@
             height: 30%;
             width: 100%;
             position: relative;
-            border-top: 2px solid #25A6E9;
+            border-top: 2px solid #6184D8;
         }
 
         #zoe-console {
             padding: 15px;
-            padding-top: 40px;
-            background-color: #161e29;
-            color: #bfc7d2;
+            padding-top: 25px;
+            background-color: #0D1321;
+            color: #F3E0EC;
             height: 100%;
             white-space: pre;
         }
@@ -132,7 +122,7 @@ var print_n = fn (n) {
     if n < 0 or n == 0 {
         return nil;
     }
-    print("hello world");
+    print("Hello, World!");
     print_n(n - 1);
 };
 
