@@ -99,9 +99,8 @@
     <script>
         const zoeSrc = document.querySelector("#zoe-src");
         zoeSrc.textContent = `// Welcome to The Zoe Programming Language!
-// Documentation: https://github.com/wright-jordan-n/zoe
-        
-    var print_n = fn (n) {
+
+var print_n = fn (n) {
     if n < 0 or n == 0 {
         return nil;
     }
@@ -109,7 +108,10 @@
     print_n(n - 1);
 };
 
-print_n(1);`;
+print_n(1);
+
+
+// Documentation: https://github.com/wright-jordan-n/zoe`;
         var TokenType;
         (function (TokenType) {
             TokenType[TokenType["ASSIGN"] = 0] = "ASSIGN";
