@@ -1694,7 +1694,7 @@ say_hi();
         }
 
         document.querySelector("#zoe-src").focus();
-        document.querySelector("#zoe-src").selectionStart = document.querySelector("#zoe-src").textContent.length;
+        document.querySelector("#zoe-src").selectionStart = document.querySelector("#zoe-src").textContent.length - 1;
         const btn = document.querySelector("#zoe-run");
         btn.addEventListener("click", function () {
             const zoe_console = document.querySelector("#zoe-console");
