@@ -50,7 +50,7 @@ expression can you used to access the individual bytes of a string.
 ### Functions
 
 Functions in Zoe are first-class values. A function literal expression is
-preceded with the keyword `fn`.
+preceded with the keyword `fn` and optionally contains a `return` statement.
 
 ```
 fn (x, y) {
@@ -149,4 +149,14 @@ var print_until = fn (n) {
 }
 
 print_until(10); // Prints numbers 1-9 in order.
+```
+
+## Arithmetic
+
+Arithmetic operators include: `+`, `-`, `*`, `/`, `%`. The default order of operations can be overrided with parentheses.
+
+```
+print((5 + 2) * 3); // Prints 21
+
+print(5 + 2 * 3); // Prints 11
 ```
