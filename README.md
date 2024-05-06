@@ -61,8 +61,8 @@ fn (x, y) {
 ### Objects
 
 Objects can be used to group a collection of identifiers. An object literal
-expression is comma seperated list of key value pairs surrounded by curly
-braces.
+expression is written as a comma seperated list of key value pairs surrounded by
+curly braces.
 
 ```
 { n: 42, msg: "Hello, World!" }
