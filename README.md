@@ -106,7 +106,7 @@ t = { n: 0 };
 Functions are called by supplying the identifier with a list of arguments.
 
 ```
-// Prints the integer 3.
+// Prints the integer 3
 print(add(1, 2));
 ```
 
@@ -117,7 +117,7 @@ Object properties can be accessed with the `.` operator.
 ```
 var obj = { n: 0 };
 obj.n = 42;
-print(obj.n) // Prints the integer 42.
+print(obj.n) // Prints the integer 42
 ```
 
 ## Control Flow
@@ -146,9 +146,9 @@ var print_until = fn (n) {
     }
     print(n);
     print_until(n + 1);
-}
+};
 
-print_until(10); // Prints numbers 1-9 in order.
+print_until(10); // Prints numbers 1-9 in order
 ```
 
 ## Arithmetic
