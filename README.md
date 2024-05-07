@@ -168,3 +168,61 @@ The `+` operator can also be used to concatenate strings.
 ```
 print("Hello, " + "World!"); // Prints "Hello, World!"
 ```
+
+## Examples
+
+The following section is just a set of code examples to help you get started.
+
+### Linked List
+
+```
+var List = fn () {
+    return { head: nil };
+};
+
+var append = fn (list, val) {
+    if list.head == nil {
+        list.head = { val, next: nil };
+        return;
+    }
+    _append(list.head, val);
+};
+
+var _append = fn (node, val) {
+    if node.next == nil {
+        node.next = { val, next: nil };
+        return;
+    }
+    _append(node.next, val);
+};
+
+var prepend = fn (list, val) {
+    var new_head = { val, next: list.head };
+    list.head = new_head;
+};
+
+var remove = fn (list, val) {
+    if list.head == nil {
+        return;
+    }
+    if list.head.val == val {
+        list.head = nil;
+        return;
+    }
+    if list.head.next == nil {
+        return;
+    }
+    _remove(list.head, list.head.next, val);
+};
+
+var _remove = fn (prev, curr, val) {
+    if curr.val == val {
+        prev.next = curr.next;
+        return;
+    }
+    if curr.next == nil {
+        return;
+    }
+    _remove(prev = curr, curr = curr.next, val);
+};
+```
