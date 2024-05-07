@@ -223,6 +223,6 @@ var _remove = fn (prev, curr, val) {
     if curr.next == nil {
         return;
     }
-    _remove(prev = curr, curr = curr.next, val);
+    _remove(curr, curr.next, val);
 };
 ```
