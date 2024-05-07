@@ -173,6 +173,20 @@ print("Hello, " + "World!"); // Prints "Hello, World!"
 
 The following section is just a set of code examples to help you get started.
 
+### Factorial
+
+```
+var factorial = fn (n) {
+    if n < 0 {
+        return nil;
+    }
+    if n == 0 {
+        return 1;
+    }
+    return n * factorial(n - 1);
+};
+```
+
 ### Linked List
 
 ```
