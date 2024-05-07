@@ -179,11 +179,11 @@ The following section is just a set of code examples to help you get started.
 var factorial = fn (n) {
     if n < 0 {
         return nil;
-    }
-    if n == 0 {
+    } else if n == 0 {
         return 1;
+    } else {
+        return n * factorial(n - 1);
     }
-    return n * factorial(n - 1);
 };
 ```
 
