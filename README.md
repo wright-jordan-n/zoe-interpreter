@@ -1,6 +1,6 @@
 # The Zoe Programming Language
 
-https://wright-jordan-n.github.io/zoe/
+Demo: https://wright-jordan-n.github.io/zoe/
 
 ## Data Types
 
