@@ -1578,7 +1578,7 @@ say_hi();
         function stringifyZoeValue(rv) {
             switch (rv.tag) {
                 case ValueType.NULL:
-                    return "null";
+                    return "nil";
                 case ValueType.FLOAT: {
                     let str = rv.value.toString();
                     if (!str.includes(".")) {
