@@ -24,7 +24,7 @@ octal, binary, or hexadecimal, respectively.
 0o52 0b101010 0x2A
 ```
 
-In order for a number to be treated as a floating point number it _must_ contain
+In order for a number to be treated as a floating-point number it _must_ contain
 a decimal portion.
 
 ```
@@ -39,7 +39,7 @@ A boolean type is represented as either the value `true` or `false`.
 ### Strings
 
 A value surrounded by double quotes will be treated as a string. A subscript
-expression can you used to access the individual bytes of a string.
+expression operator expression used to access the individual bytes of a string.
 
 ```
 // The string "Hello, World!"
@@ -72,8 +72,7 @@ curly braces.
 
 ### Nil
 
-Lastly, there is `nil`. It is both a value and a type, used to represent the
-absence of a value. If a function does not have an explicit return value it will
+Lastly, there is `nil`. It is both a value and a type. If a function does not have an explicit return value it will
 return `nil`.
 
 ## Variables
