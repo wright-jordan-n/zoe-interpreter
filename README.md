@@ -148,7 +148,7 @@ var print_desc = fn (n) {
     print_desc(n - 1);
 };
 
-print_desc(9); // Prints numbers 1-10 in descending order
+print_desc(10); // Prints numbers 1-10 in descending order
 ```
 
 ## Arithmetic
