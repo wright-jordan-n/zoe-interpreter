@@ -140,15 +140,15 @@ Comparison and logical operators include: `==`, `!=`, `<`, `>`, `and`, `or`,
 The only construct available for looping in Zoe is recursion.
 
 ```
-var print_until = fn (n) {
-    if n == 0 or n > 0 {
+var print_desc = fn (n) {
+    if n == 0 or n < 0 {
         return;
     }
     print(n);
-    print_until(n + 1);
+    print_desc(n - 1);
 };
 
-print_until(10); // Prints numbers 1-9 in order
+print_desc(9); // Prints numbers 1-10 in descending order
 ```
 
 ## Arithmetic
