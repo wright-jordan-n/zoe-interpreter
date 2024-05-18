@@ -1,6 +1,6 @@
 # The Zoe Programming Language
 
-https://wright-jordan-n.github.io/zoe/
+Use the interpreter [HERE](https://wright-jordan-n.github.io/zoe/).
 
 ## Data Types
 
