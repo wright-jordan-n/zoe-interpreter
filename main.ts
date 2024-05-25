@@ -82,15 +82,12 @@ function print(rv_arr: RuntimeValue[]): RuntimeValue {
   return NullValue();
 }
 
-function panic(rv_arr: RuntimeValue[]): RuntimeValue {
+function panic(rv_arr) {
   if (rv_arr.length !== 1) {
     throw new Error("error: panic function expects one argument");
   }
   const val = rv_arr[0];
-  if (val.tag !== ValueType.STRING) {
-    throw new Error("error: panic function expects a string");
-  }
-  throw new Error(`error: ${val.value}`);
+  throw new Error(`error: ${stringifyZoeValue(val)}`);
 }
 
 const strings = ObjectValue({
