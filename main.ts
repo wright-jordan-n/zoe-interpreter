@@ -17,7 +17,7 @@ import {
 function stringifyZoeValue(rv: RuntimeValue): string {
   switch (rv.tag) {
     case ValueType.NULL:
-      return "null";
+      return "nil";
     case ValueType.FLOAT: {
       let str = rv.value.toString();
       if (!str.includes(".")) {
