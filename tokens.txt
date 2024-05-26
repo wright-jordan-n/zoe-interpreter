@@ -1,11 +1,12 @@
 ' ' \t \n \v \f \r
-= == + += - -= * *= / /= // % %= < <= > >=
+= == + - * / // % < >
 ( ) { } [ ] , : ;
-" ` '
-! != && ||
+"
+! !=
 INT FLOAT BINARY OCTAL HEX
-var if else fn return loop break continue
+var if else fn return
 true false
+and or
 IDENTIFIER
 
-& | ^ << >> ~
+todo: '
