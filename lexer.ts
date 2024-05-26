@@ -118,6 +118,10 @@ export function lex(src: string): { toks: Token_t[]; errs: string[] } {
                 ptr.i += 1;
                 literal.push("\\");
                 break;
+              case "0":
+                ptr.i += 1;
+                literal.push("\0");
+                break;
               default:
                 ptr.i += 1;
                 stringLexErr = true;
