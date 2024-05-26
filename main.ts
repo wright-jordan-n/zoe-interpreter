@@ -129,7 +129,7 @@ if (Deno.args.length === 0) {
         console.log(err);
       }
     }
-    console.log(toks);
+    // console.log(toks);
     ({ stmts, errs: parseErrs } = parse(toks));
     if (parseErrs.length !== 0) {
       hasError = true;
@@ -137,7 +137,7 @@ if (Deno.args.length === 0) {
         console.log(err);
       }
     }
-    console.log(stmts);
+    // console.log(stmts);
     if (!hasError) {
       try {
         interpret(stmts, globalScope);
@@ -153,7 +153,7 @@ if (Deno.args.length === 0) {
   let toks: Token_t[], stmts: Stmt[], lexErrs: string[], parseErrs: string[];
   let hasError = false;
   ({ toks, errs: lexErrs } = lex(src));
-  console.log(toks);
+  // console.log(toks);
   if (lexErrs.length !== 0) {
     hasError = true;
     for (const err of lexErrs) {
@@ -161,7 +161,7 @@ if (Deno.args.length === 0) {
     }
   }
   ({ stmts, errs: parseErrs } = parse(toks));
-  console.log(stmts);
+  // console.log(stmts);
   if (parseErrs.length !== 0) {
     hasError = true;
     for (const err of parseErrs) {
