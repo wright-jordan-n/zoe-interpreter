@@ -38,7 +38,7 @@ A boolean type is represented as either the value `true` or `false`.
 
 ### Strings
 
-A value surrounded by double quotes will be treated as a string. A subscript operator expression used to access the individual bytes of a string.
+A value surrounded by double quotes will be treated as a string. A subscript operator expression used to access the individual bytes of a string (note: strings can be mutated via indexing).
 
 ```
 // The string "Hello, World!"
