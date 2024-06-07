@@ -38,7 +38,7 @@ A boolean type is represented as either the value `true` or `false`.
 
 ### Strings
 
-A value surrounded by double quotes will be treated as a string. A subscript operator expression used to access the individual bytes of a string (note: strings can be mutated via indexing).
+A value surrounded by double quotes will be treated as a string. A subscript operator expression used to access the individual bytes of a string.
 
 ```
 // The string "Hello, World!"
@@ -167,6 +167,16 @@ The `+` operator can also be used to concatenate strings.
 
 ```
 print("Hello, " + "World!"); // Prints "Hello, World!"
+```
+
+## String Mutation
+
+Strings can be mutated by reassigning its indices.
+
+```
+var c = "a";
+c[0] = 98;
+print(c); // Prints "b"
 ```
 
 ## Examples
