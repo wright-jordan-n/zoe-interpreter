@@ -82,7 +82,7 @@ function print(rv_arr: RuntimeValue[]): RuntimeValue {
   return NullValue();
 }
 
-function panic(rv_arr) {
+function panic(rv_arr: RuntimeValue[]): RuntimeValue {
   if (rv_arr.length !== 1) {
     throw new Error("error: panic function expects one argument");
   }

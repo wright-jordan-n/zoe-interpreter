@@ -1,4 +1,4 @@
-' ' \t \n \v \f \r
+SPACE \t \n \v \f \r
 = == + - * / // % < >
 ( ) { } [ ] , : ;
 "
@@ -8,5 +8,3 @@ var if else fn return
 true false
 and or
 IDENTIFIER
-
-todo: '

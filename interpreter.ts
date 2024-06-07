@@ -345,6 +345,34 @@ function evalAssignmentExpr(
           parentVal.value[child.symbol] = value;
           return value;
         }
+        case NodeType.SUBSCRIPT_EXPR: {
+          const lhs = evaluate(expr.assignee.left, scope);
+          const rhs = evaluate(expr.assignee.right, scope);
+
+          if (lhs.tag !== ValueType.STRING) {
+            throw new Error(
+              "error: lhs of subscript expresssion must be a string",
+            );
+          }
+          if (rhs.tag !== ValueType.INTEGER) {
+            throw new Error(
+              "error: subscript expression expects integer argument",
+            );
+          }
+          if (rhs.value >= lhs.value.length) {
+            throw new Error(
+              "error: attempting to index outside of string range",
+            );
+          }
+          const value = evaluate(expr.value, scope);
+          if (value.tag !== ValueType.INTEGER) {
+            throw new Error(
+              "error: string index can only be assigned to type integer",
+            );
+          }
+          lhs.value[Number(rhs.value)] = Number(value.value);
+          return value;
+        }
         default:
           throw new Error(
             "error: assignee must be an identifier or object property",
