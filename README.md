@@ -38,7 +38,8 @@ A boolean type is represented as either the value `true` or `false`.
 
 ### Strings
 
-A value surrounded by double quotes will be treated as a string. A subscript operator expression used to access the individual bytes of a string.
+A value surrounded by double quotes will be treated as a string. A subscript
+operator expression used to access the individual bytes of a string.
 
 ```
 // The string "Hello, World!"
@@ -71,8 +72,8 @@ curly braces.
 
 ### Nil
 
-Lastly, there is `nil`. It is both a value and a type. If a function does not have an explicit return value it will
-return `nil`.
+Lastly, there is `nil`. It is both a value and a type. If a function does not
+have an explicit return value it will return `nil`.
 
 ## Variables
 
@@ -153,7 +154,9 @@ print_desc(10); // Prints numbers 1-10 in descending order
 
 ## Arithmetic
 
-Arithmetic operators include: `+`, `-`, `*`, `/`, `%`. The default order of operations can be overrided with parentheses. Arithmetic requires that operands be of the same type. That is, both integers or both floats.
+Arithmetic operators include: `+`, `-`, `*`, `/`, `%`. The default order of
+operations can be overrided with parentheses. Arithmetic requires that operands
+be of the same type. That is, both integers or both floats.
 
 ```
 print((5 + 2) * 3); // Prints 21
@@ -174,9 +177,9 @@ print("Hello, " + "World!"); // Prints "Hello, World!"
 Strings can be mutated by reassigning its indices.
 
 ```
-var c = "a";
-c[0] = 98;
-print(c); // Prints "b"
+var ch = "a";
+ch[0] = c[0] + 1;
+print(ch); // Prints "b"
 ```
 
 ## Examples
