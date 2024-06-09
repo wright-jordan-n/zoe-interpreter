@@ -178,7 +178,7 @@ Strings can be mutated by reassigning its indices.
 
 ```
 var ch = "a";
-ch[0] = c[0] + 1;
+ch[0] = ch[0] + 1;
 print(ch); // Prints "b"
 ```
 
