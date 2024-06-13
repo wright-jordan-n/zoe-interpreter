@@ -45,7 +45,7 @@ operator expression used to access the individual bytes of a string.
 // The string "Hello, World!"
 "Hello, World!"
 
-// The integer value of the character "e"
+// The integer value of the character 'e'
 "Hello, World!"[1]
 ```
 
