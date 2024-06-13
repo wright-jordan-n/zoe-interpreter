@@ -174,7 +174,7 @@ print("Hello, " + "World!"); // Prints "Hello, World!"
 
 ## String Mutation
 
-Strings can be mutated by reassigning its indices.
+A string can be mutated by reassigning its indices.
 
 ```
 var ch = "a";
