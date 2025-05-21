@@ -72,7 +72,7 @@ curly braces.
 
 ### Nil
 
-Lastly, there is `nil`. It is both a value and a type. If a function does not
+Lastly, there is `nil`. If a function does not
 have an explicit return value it will return `nil`.
 
 ## Variables
